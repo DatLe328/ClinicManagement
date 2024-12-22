@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from app import db, app
 from enum import Enum as RoleEnum
 from flask_login import UserMixin
-from datetime import datetime
+from datetime import datetime, date
 
 
 class UserRole(RoleEnum):
@@ -185,8 +185,8 @@ if __name__ == '__main__':
         pd2_p3 = PrescriptionDetail(quantity=15, medicine_id=6, prescription_id=3)
 
         # Seed Appointment Lists
-        al1 = AppointmentList(name="Appointment List 1", date=datetime.now())
-        al2 = AppointmentList(name="Appointment List 2", date=datetime.now())
+        al1 = AppointmentList(name="Appointment List 1", date=date(2024,1,1))
+        al2 = AppointmentList(name="Appointment List 2", date=date(2024,2,1))
 
         # Seed Appointment List Details
         ald1_al1 = AppointmentDetail(appointment_list_id=1, user_id=3)
@@ -214,9 +214,9 @@ if __name__ == '__main__':
         mhd1_mh3 = MedicalHistoryDetail(medical_history_id=3, disease_id=5)
 
         # Seed Invoices
-        i1 = Invoice(name="Invoice 1", total_amount=1000000, user_id=3)
-        i2 = Invoice(name="Invoice 2", total_amount=2000000, user_id=5)
-        i3 = Invoice(name="Invoice 3", total_amount=4000000, user_id=4)
+        i1 = Invoice(name="Invoice 1", total_amount=1000000, user_id=3, date=date(2024, 1, 2))
+        i2 = Invoice(name="Invoice 2", total_amount=2000000, user_id=5, date=date(2024, 1, 3))
+        i3 = Invoice(name="Invoice 3", total_amount=4000000, user_id=4, date=date(2024, 1, 4))
         i4 = Invoice(name="Invoice 4", total_amount=2600000, user_id=2)
         i5 = Invoice(name="Invoice 5", total_amount=1700000, user_id=5)
         i6 = Invoice(name="Invoice 6", total_amount=2000000, user_id=1)
@@ -228,13 +228,30 @@ if __name__ == '__main__':
         db.session.add_all([mc1, mc2, mc3])
         db.session.add_all([m1, m2, m3, m4, m5, m6])
         db.session.add_all([d1, d2, d3, d4, d5])
-        # db.session.add_all([p1, p2, p3])
-        # db.session.add_all([pd1_p1, pd2_p1, pd3_p1, pd1_p2, pd2_p2, pd1_p3, pd2_p3])
-        # db.session.add_all([al1, al2])
-        # db.session.add_all([ald1_al1, ald2_al1, ald1_al2])
-        # db.session.add_all([mh1, mh2, mh3])
-        # db.session.add_all([mhd1_mh1, mhd2_mh1, mhd3_mh1, mhd1_mh2, mhd2_mh2, mhd1_mh3])
-        # db.session.add_all([i1, i2, i3, i4, i5, i6, i7, i8])
+        db.session.add_all([p1, p2, p3])
+        db.session.add_all([pd1_p1, pd2_p1, pd3_p1, pd1_p2, pd2_p2, pd1_p3, pd2_p3])
+        db.session.add_all([al1, al2])
+        db.session.add_all([ald1_al1, ald2_al1, ald1_al2])
+        db.session.add_all([mh1, mh2, mh3])
+        db.session.add_all([mhd1_mh1, mhd2_mh1, mhd3_mh1, mhd1_mh2, mhd2_mh2, mhd1_mh3])
+        db.session.add_all([i1, i2, i3, i4, i5, i6, i7, i8])
 
+        # pp = Prescription(name="Prescription 1", symptoms="Stomachache", diagnosis="Stomach Ulcer", user_id=1,
+        #                   date=date(2024, 12, 19))
+        # dd = PrescriptionDetail(quantity=3, medicine_id=3, prescription_id=1)
+        # aa = AppointmentList(name="Appointment List 1", date=date(2024, 12, 19))
+        # bb = AppointmentDetail(appointment_list_id=1, user_id=1)
+        # mm = MedicalHistory(name="Medical History 1", user_id=1)
+        # kk = MedicalHistoryDetail(medical_history_id=1, disease_id=1)
+        # db.session.add_all([pp, dd, aa, bb, mm, kk])
+
+        # uu = Prescription(name="Prescription 2", symptoms="dau dau", diagnosis="tieu chay", user_id=1,
+        #                   date=date(2024, 12, 20))
+        # ii = PrescriptionDetail(quantity=5, medicine_id=2, prescription_id=2)
+        # oo = AppointmentList(name="Appointment List 2", date=date(2024, 12, 20))
+        # yy = AppointmentDetail(appointment_list_id=2, user_id=1)
+        # rr = MedicalHistory(name="Medical History 2", user_id=1)
+        # ee = MedicalHistoryDetail(medical_history_id=2, disease_id=1)
+        # db.session.add_all([uu, ii, oo, yy, rr, ee])
         # Commit the session
         db.session.commit()

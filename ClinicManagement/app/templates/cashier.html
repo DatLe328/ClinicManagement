@@ -69,38 +69,4 @@
     </div>
 </div>
 
-<!--<div class="receipt-form">-->
-<!--    <div class="row r-title mt-3" style="font-weight: bold">-->
-<!--        <p>DANH SÁCH HÓA ĐƠN</p>-->
-<!--    </div>-->
-<!--    <hr>-->
-
-<!--    <div class="receipt-table">-->
-<!--        <table class="table">-->
-<!--            <tr>-->
-<!--                <th>Mã hóa đơn</th>-->
-<!--                <th>Mã phiếu khám</th>-->
-<!--                <th>Họ tên</th>-->
-<!--                <th>Ngày khám</th>-->
-<!--                <th>Tiền khám</th>-->
-<!--                <th>Tiền thuốc</th>-->
-<!--                <th>Tổng tiền</th>-->
-<!--            </tr>-->
-<!--            {% for hd in danh_sach_hoa_don %}-->
-<!--            <tr>-->
-<!--                <td>{{ hd.0 }}</td>-->
-<!--                <td>{{ hd.1 }}</td>-->
-<!--                <td>{{ hd.2 }}</td>-->
-<!--                <td>{{ hd.3 }}</td>-->
-<!--                {% if tien_kham %}-->
-<!--                <td>{{ tien_kham }}</td>-->
-<!--                <td>{{ "{:,.0f}".format (hd.4 - tien_kham) }} VND</td>-->
-<!--                <td>{{ "{:,.0f}".format (hd.4) }} VND</td>-->
-<!--                {% endif %}-->
-<!--            </tr>-->
-<!--            {% endfor %}-->
-<!--        </table>-->
-<!--    </div>-->
-<!--</div>-->
-
 {% endblock %}

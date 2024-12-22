@@ -8,6 +8,28 @@
             <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" rel="stylesheet"/>
         </head>
 
+        <form method="get" action="/doctor" class="d-flex">
+            <input class="form-control me-2" type="text" name="kw" placeholder="Tìm sản phẩm"/>
+            <button class="btn btn-primary" type="submit">Tìm</button>
+        </form>
+
+
+        <div class="patient-info mt-3">
+            {% if search_result %}
+                <h4>Thông tin bệnh nhân:</h4>
+                <ul>
+                    <li>ID: {{ search_result[0][0] }}</li>
+                    <li>Họ tên: {{ search_result[0][1] }}</li>
+                    <li>Giới tính: {{ search_result[0][2] }}</li>
+                    <li>Ngày sinh: {{ search_result[0][3] }}</li>
+                    <li>Địa chỉ: {{ search_result[0][4] }}</li>
+                    <li>Số điện thoại: {{ search_result[0][5] }}</li>
+                </ul>
+            {% else %}
+                <p>Không tìm thấy thông tin bệnh nhân.</p>
+            {% endif %}
+        </div>
+        </script>
         <div class="content">
             <div class="doctor row">
                 <div class="doctor-left col-md-4 col-sm-12 text-center">
@@ -24,7 +46,7 @@
                             <div class="m-user mb-3 mt-3">
                                 <label for="u-id" class="lb-id form-label">Mã bệnh nhân:</label>
                                 <input type="text" class="form-control" id="doctor_get_user_by_user_id"
-                                       placeholder="Nhập mã bệnh nhân" name="doctor_get_user_by_user_id">
+                                       placeholder="Nhập mã bệnh nhân" name="doctor_get_user_by_user_id" value="{{ tmp }}">
                             </div>
                         </div>
                         <hr>
@@ -112,6 +134,7 @@
                                     <th>Đơn vị</th>
                                     <th>Số lượng</th>
                                     <th>Cách dùng</th>
+                                    <th></th>
                                 </tr>
                                 {% for t in thuoc_trong_ctpk %}
                                     <tr>
@@ -122,27 +145,13 @@
                                         <td>{{ t.quantity }}</td>
                                         <td>{{ t.description }}</td>
                                         <td>
-                                            <!-- Edit Description Form -->
-                                            <form method="post" action="/update_thuoc_description">
-                                                <input type="hidden" name="thuoc_id" value="{{ t['id'] }}">
-                                                <input type="text" class="form-control" name="description"
-                                                       value="{{ t['description'] }}"/>
-                                                <button type="submit" class="btn btn-success btn-sm mt-1">Lưu</button>
-                                            </form>
-                                        </td>
-                                        <td>
-                                            <form method="post" action="/delete_thuoc">
-                                                <input type="hidden" name="thuoc_id" value="{{ t['id'] }}">
-                                                <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
-                                            </form>
+                                            <button type="submit" name="action" value="delete-{{ t.id }}" class="btn btn-primary">{{ t.prescription_id }}</button>
                                         </td>
                                     </tr>
                                 {% endfor %}
                             </table>
                         </div>
-                        <div class="bt-save form-floating mt-3 mb-3 text-center">
-                            <input type="submit" value="Lưu" class="btn btn-warning"/>
-                        </div>
+                        <button type="submit" name="action" value="save" class="btn btn-primary form-floating mt-3 mb-3 text-center">Save</button>
                     </form>
                 </div>
             </div>
@@ -153,6 +162,7 @@
                 Tạo phiếu <strong>thành công &#10004</strong>
             </div>
         </div>
+
 
     {% else %}
         <h1>GOOD</h1>
