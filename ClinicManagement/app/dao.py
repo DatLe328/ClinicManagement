@@ -6,6 +6,50 @@ from flask_login import current_user
 from sqlalchemy import func
 from sqlalchemy.sql.functions import user
 
+# ========================== TEST ZONE ========================== #
+def delete_medicine_from_prescription(medicine_id, prescription_id):
+    try:
+        db.session.query(PrescriptionDetail).filter(
+            PrescriptionDetail.medicine_id == medicine_id,
+            PrescriptionDetail.prescription_id == prescription_id
+        ).delete()
+        db.session.commit()
+    except Exception as e:
+        print(f"Error deleting medicine from prescription: {e}")
+        db.session.rollback()
+def check_existing_medicine_in_prescription(thuoc_id, phieu_kham_id):
+    """
+    Check if a medicine already exists in the prescription.
+    """
+    return db.session.query(PrescriptionDetail).filter(
+        PrescriptionDetail.medicine_id == thuoc_id,
+        PrescriptionDetail.prescription_id == phieu_kham_id
+    ).first()
+def check_existing_medicine_in_prescription(thuoc_id, phieu_kham_id):
+    """
+    Check if a medicine already exists in the prescription.
+    """
+    return db.session.query(PrescriptionDetail).filter(
+        PrescriptionDetail.medicine_id == thuoc_id,
+        PrescriptionDetail.prescription_id == phieu_kham_id
+    ).first()
+def update_medicine_quantity_in_prescription(thuoc_id, phieu_kham_id, new_quantity):
+    """
+    Update the quantity of a medicine in the prescription.
+    """
+    try:
+        prescription_detail = db.session.query(PrescriptionDetail).filter(
+            PrescriptionDetail.medicine_id == thuoc_id,
+            PrescriptionDetail.prescription_id == phieu_kham_id
+        ).first()
+        if prescription_detail:
+            prescription_detail.quantity = new_quantity
+            db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error updating medicine quantity: {e}")
+
+# ================================================================ #
 def load_prescription_details_today(ma_phieu_kham_today):
     query = db.session.query(PrescriptionDetail.medicine_id, Medicine.name, Medicine.unit,
                              PrescriptionDetail.quantity) \

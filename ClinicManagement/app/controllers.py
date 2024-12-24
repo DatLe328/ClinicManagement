@@ -256,13 +256,7 @@ def save_chi_tiet_danh_sach_kham():
 
 
 # =============== Create prescription =============== #
-@app.route("/search_patient", methods=['get'])
-def search_patient_process():
-    err_msg = ''
-    user_list = []
-
-
-@app.route("/add_prescription", methods=['get', 'post'])
+@app.route("/add_prescription", methods=['GET', 'POST'])
 def doctor_get_user_by_user_id():
     err_msg = ''
     action = request.form.get('action')
@@ -270,27 +264,44 @@ def doctor_get_user_by_user_id():
     if action == "search_patient":
         if user_id:
             user = dao.get_user_by_id(user_id)
-            print(user)
             if user:
-                return render_template("doctor.html", err_msg=err_msg, search_result=user)
-        else:
-            err_msg='Không tồn tại bệnh nhân hoặc bệnh nhân chưa đăng ký khám'
-        render_template("doctor.html", err_msg=err_msg)
+                return render_template("doctor.html", err_msg=err_msg, search_result=user, user_id=user_id)
+            else:
+                err_msg = 'Không tồn tại bệnh nhân hoặc bệnh nhân chưa đăng ký khám'
+        return render_template("doctor.html", err_msg=err_msg)
     else:
-        medicine = request.form.get('medicine')
-        quantity = request.form.get('so_luong_thuoc')
+        medicine_name = request.form.get('medicine')
+        quantity = int(request.form.get('so_luong_thuoc', 0))
+
         user_prescriptions = dao.get_prescriptions_for_today(user_id=user_id)
         if user_prescriptions:
-            pk_today_for_one_user = dao.get_prescriptions_for_today(user_id=user_id)
+            pk_today_for_one_user = user_prescriptions[0]
+            global ma_phieu_kham_today
+            ma_phieu_kham_today = pk_today_for_one_user[0]
+
             if pk_today_for_one_user:
                 global user_id_in_phieu_kham
-                user_id_in_phieu_kham = pk_today_for_one_user[0][5]
+                user_id_in_phieu_kham = pk_today_for_one_user[5]
                 user_in_phieu_kham = dao.load_users_by_user_id(user_id=user_id_in_phieu_kham)
+
                 if user_in_phieu_kham:
-                    thuoc = dao.load_medicines_by_name(medicine)
+                    thuoc = dao.load_medicines_by_name(medicine_name)
+
                     if thuoc:
-                        dao.save_chi_tiet_phieu_kham(so_luong_thuoc=quantity, thuoc_id=thuoc[0][0],
-                                                     phieu_kham_id=pk_today_for_one_user[0][0])
+                        thuoc_id = thuoc[0][0]
+                        existing_medicine = dao.check_existing_medicine_in_prescription(
+                            thuoc_id=thuoc_id, phieu_kham_id=ma_phieu_kham_today
+                        )
+
+                        if existing_medicine:
+                            new_quantity = existing_medicine.quantity + quantity
+                            dao.update_medicine_quantity_in_prescription(
+                                thuoc_id=thuoc_id, phieu_kham_id=ma_phieu_kham_today, new_quantity=new_quantity
+                            )
+                        else:
+                            dao.save_chi_tiet_phieu_kham(
+                                so_luong_thuoc=quantity, thuoc_id=thuoc_id, phieu_kham_id=ma_phieu_kham_today
+                            )
 
                         return render_template("doctor.html", err_msg=err_msg, user_id=user_id)
                     else:
@@ -301,7 +312,9 @@ def doctor_get_user_by_user_id():
                 err_msg = "Không tìm được mã bệnh nhân trong danh sách các phiếu khám"
         else:
             err_msg = "Phiếu khám chưa được tạo"
+
     return render_template("doctor.html", err_msg=err_msg)
+
 
 
 user_id_in_phieu_kham = 0
@@ -323,29 +336,46 @@ def get_danh_sach_kham():
         'danh_sach_kham': danh_sach_kham
     }
 
+ma_phieu_kham_today = 0
 
-
-@app.route("/doctor_save_phieu_kham", methods=['get', 'post'])
+@app.route("/doctor_save_phieu_kham", methods=['GET', 'POST'])
 def doctor_save_phieu_kham():
     err_msg = ''
-    if request.method == ('POST'):
+    action = request.form.get('action')
+    if action and action.startswith('delete'):
+        try:
+            medicine_id = int(action.split('-')[1])  
+            prescription_id = ma_phieu_kham_today 
+            dao.delete_medicine_from_prescription(medicine_id, prescription_id)
+            err_msg = f"Deleted medicine with ID {medicine_id} successfully."
+        except Exception as e:
+            err_msg = f"Failed to delete medicine: {str(e)}"
+    elif request.method == 'POST' and action == 'save':
         phieu_kham_id = ma_phieu_kham_today
         check_pk_id = dao.load_phieu_kham_id_today_by_phieu_kham_id(phieu_kham_id=phieu_kham_id)
 
         if check_pk_id:
-            check_pk_id_numString = str(check_pk_id[0][0])
-            trieu_chung = request.form.get("trieu_chung")
-            chuan_doan = request.form.get("chuan_doan")
-            if trieu_chung and chuan_doan:
-                dao.update_phieu_kham(phieu_kham_id=check_pk_id_numString, trieu_chung=trieu_chung,
-                                      chuan_doan=chuan_doan)
-                benh_id = dao.load_benh_id_by_ten_benh(chuan_doan)
-                lsb_id = dao.load_lich_su_benh_id_by_phieu_kham_id(check_pk_id_numString)
+            try:
+                check_pk_id_numString = str(check_pk_id[0][0]) 
+                trieu_chung = request.form.get("trieu_chung")
+                chuan_doan = request.form.get("chuan_doan")
 
-                dao.save_chi_tiet_lich_su_benh(lich_su_benh_id=lsb_id[0][0], benh_id=benh_id[0][0])
-                err_msg = "Lưu thành công phiếu khám có mã phiếu là " + check_pk_id_numString
-            else:
-                err_msg = "Chưa nhập chuẩn đoán và triệu chứng"
+                if trieu_chung and chuan_doan:
+                    dao.update_phieu_kham(phieu_kham_id=check_pk_id_numString, trieu_chung=trieu_chung,
+                                          chuan_doan=chuan_doan)
+                    
+                    benh_id = dao.load_benh_id_by_ten_benh(chuan_doan)
+                    lsb_id = dao.load_lich_su_benh_id_by_phieu_kham_id(check_pk_id_numString)
+
+                    if lsb_id and benh_id:
+                        dao.save_chi_tiet_lich_su_benh(lich_su_benh_id=lsb_id[0][0], benh_id=benh_id[0][0])
+                        err_msg = f"Lưu thành công phiếu khám có mã phiếu là {check_pk_id_numString}"
+                    else:
+                        err_msg = "Lịch sử bệnh hoặc bệnh không tồn tại trong cơ sở dữ liệu"
+                else:
+                    err_msg = "Chưa nhập chuẩn đoán và triệu chứng"
+            except Exception as e:
+                err_msg = f"An error occurred while saving the prescription: {str(e)}"
         else:
             err_msg = "Không tồn tại phiếu khám này"
     return render_template("doctor.html", err_msg=err_msg)

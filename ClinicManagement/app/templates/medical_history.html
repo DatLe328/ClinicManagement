@@ -39,22 +39,6 @@
                                 <button class="btn btn-primary" type="submit">Tìm</button>
 
                             </form>
-                            <div class="mt-3">
-                                    {% if search_result %}
-                                        <p>Đã tìm thấy</p>
-                                        <h4>Thông tin bệnh nhân:</h4>
-                                        <ul>
-                                            <li>ID: {{ search_result }}</li>
-                                            {#                                                    <li>Họ tên: {{ search_result[0][1] }}</li>#}
-                                            {#                                                    <li>Giới tính: {{ search_result[0][2] }}</li>#}
-                                            {#                                                    <li>Ngày sinh: {{ search_result[0][3] }}</li>#}
-                                            {#                                                    <li>Địa chỉ: {{ search_result[0][4] }}</li>#}
-                                            {#                                                    <li>Số điện thoại: {{ search_result[0][5] }}</li>#}
-                                        </ul>
-                                    {% else %}
-                                        <p>Không tìm thấy thông tin bệnh nhân.</p>
-                                    {% endif %}
-                                </div>
                             {% if err_msg %}
                                 <div class="alert alert-danger">
                                     {{ err_msg }}
