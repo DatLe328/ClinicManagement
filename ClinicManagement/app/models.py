@@ -136,43 +136,43 @@ if __name__ == '__main__':
         password = str(hashlib.md5(password.encode('utf-8')).hexdigest())
         password_admin = str(hashlib.md5(password_admin.encode('utf-8')).hexdigest())
 
-        # Seed Users
-        u1 = User(full_name="Tran Dang Tuan", username="admin", password=password_admin, gender=True,
+       # Seed Users
+        u1 = User(full_name="Lê Văn Đạt", username="admin", password=password_admin, gender=True,
                   phone_number="0123", address="Ho Chi Minh City",
                   avatar="http://it.ou.edu.vn/asset/ckfinder/userfiles/5/images/giang_vien/Vinh_2.jpg", user_role=UserRole.ADMIN)
-        u2 = User(full_name="Nguyen Thi Phuong Trang", username="cashier", password=password, gender=False,
+        u2 = User(full_name="Hồ Quốc Huy", username="cashier", password=password, gender=False,
                   phone_number="0124", address="Ho Chi Minh City",
                   avatar="http://it.ou.edu.vn/asset/ckfinder/userfiles/5/images/giang_vien/Vinh_2.jpg", user_role=UserRole.CASHIER)
-        u3 = User(full_name="Nguyen Thi Mai Trang", username="nurse", password=password, gender=False,
+        u3 = User(full_name="Lê Nguyễn Đức Huy", username="nurse", password=password, gender=False,
                   phone_number="0125", address="Ho Chi Minh City",
                   avatar="http://example.com/avatar3.jpg", user_role=UserRole.NURSE)
-        u4 = User(full_name="Ho Quang Khai", username="doctor", password=password, gender=True, phone_number="0126",
+        u4 = User(full_name="Lưu Quang Tạ", username="doctor", password=password, gender=True, phone_number="0126",
                   address="Ho Chi Minh City",
                   avatar="http://example.com/avatar4.jpg", user_role=UserRole.DOCTOR)
-        u5 = User(full_name="Luu Quang Phuong", username="user", password=password, gender=True, phone_number="0127",
+        u5 = User(full_name="Nguyễn Phan Cẩm Ly", username="user", password=password, gender=True, phone_number="0127",
                   address="Ho Chi Minh City",
                   avatar="http://example.com/avatar5.jpg", user_role=UserRole.USER)
-        u6 = User(full_name="Dang Sy Tuan", username="user1", password=password, gender=True, phone_number="0128",
+        u6 = User(full_name="Tăng Duy Tân", username="user1", password=password, gender=True, phone_number="0128",
                   address="Phu Nhuan",
                   avatar="http://example.com/avatar6.jpg", user_role=UserRole.USER)
 
         # Seed Medicine Categories
-        mc1 = MedicineCategory(category_name="Liquid Medicine")
-        mc2 = MedicineCategory(category_name="Tablet Medicine")
-        mc3 = MedicineCategory(category_name="Powder Medicine")
+        mc1 = MedicineCategory(category_name="Thuốc dạng lỏng")
+        mc2 = MedicineCategory(category_name="Thuốc dạng viên")
+        mc3 = MedicineCategory(category_name="Thuốc dạng bột")
 
         # Seed Medicines
-        m1 = Medicine(name="Paracetamol", price=50000, unit="Tablet", description="Oral", category_id=2)
-        m2 = Medicine(name="Vitamin C", price=10000, unit="Tablet", description="Oral", category_id=2)
-        m3 = Medicine(name="Y", price=5000, unit="Milli", description="Oral", category_id=1)
-        m4 = Medicine(name="Sensacool", price=20000, unit="Packet", description="Oral", category_id=3)
-        m5 = Medicine(name="Adrenaline", price=30000, unit="Packet", description="Oral", category_id=3)
-        m6 = Medicine(name="Probiotic", price=15000, unit="Packet", description="Oral", category_id=3)
+        m1 = Medicine(name="Paracetamol", price=50000, unit="Viên", description="1 lần 1 ngày", category_id=2)
+        m2 = Medicine(name="Vitamin C", price=10000, unit="Viên", description="2 lần 1 ngày", category_id=2)
+        m3 = Medicine(name="Y", price=5000, unit="Milli", description="3 lần 1 ngày", category_id=1)
+        m4 = Medicine(name="Sensacool", price=20000, unit="Viên", description="2 lần 1 ngày", category_id=3)
+        m5 = Medicine(name="Adrenaline", price=30000, unit="Viên", description="2 lần 1 ngày", category_id=3)
+        m6 = Medicine(name="Probiotic", price=15000, unit="Viên", description="2 lần 1 ngày", category_id=3)
 
         # Seed Prescriptions
-        p1 = Prescription(name="Prescription 1", symptoms="Stomachache", diagnosis="Stomach Ulcer", user_id=3, date=date(2024,1,1))
-        p2 = Prescription(name="Prescription 2", symptoms="Back pain", diagnosis="Spinal Degeneration", user_id=4,date=date(2024,1,1))
-        p3 = Prescription(name="Prescription 3", symptoms="Heart pain", diagnosis="Heart Attack", user_id=5,date=date(2024,1,2))
+        p1 = Prescription(name="Prescription 1", symptoms="Đau bụng", diagnosis="Viêm loét dạ dày", user_id=3, date=date(2024,1,1))
+        p2 = Prescription(name="Prescription 2", symptoms="Đau vai", diagnosis="Thoái hoá cột sống", user_id=4,date=date(2024,1,1))
+        p3 = Prescription(name="Prescription 3", symptoms="Đau tim", diagnosis="Nhồi máu cơ tim", user_id=5,date=date(2024,1,2))
 
         # Seed Prescription Details
         pd1_p1 = PrescriptionDetail(quantity=3, medicine_id=3, prescription_id=1)

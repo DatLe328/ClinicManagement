@@ -22,24 +22,21 @@
                 {% if current_user.is_authenticated %}
                 {% if current_user.user_role.value == 3 or current_user.user_role.value == 5 %}
                 <li class="nav-item">
-                    <a class="nav-link" href="/nurse">Lập danh sách khám</a>
+                    <a class="nav-link text-white" href="/nurse">Lập danh sách khám</a>
                 </li>
                 {% endif %}
                 {% if current_user.user_role.value == 4 or current_user.user_role.value == 5 %}
                 <li class="nav-item">
-                    <a class="nav-link" href="/doctor">Lập phiếu khám</a>
+                    <a class="nav-link text-white" href="/doctor">Lập phiếu khám</a>
                 </li>
                 {% endif %}
                 {% if current_user.user_role.value == 2 or current_user.user_role.value == 5 %}
                 <li class="nav-item">
-                    <a class="nav-link" href="/cashier">Thanh toán hóa đơn</a>
+                    <a class="nav-link text-white" href="/cashier">Thanh toán hóa đơn</a>
                 </li>
                 {% endif %}
                 <li class="nav-item">
-                    <a class="nav-link" href="/medical_history">Xem lịch sử bệnh</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-danger" href="/logout">Đăng xuất</a>
+                    <a class="nav-link text-white" href="/medical_history">Xem lịch sử bệnh</a>
                 </li>
                 {% else %}
                 <li class="nav-item">

@@ -3,8 +3,6 @@ import dao, utils
 from app import app, controllers
 from app import admin
 
-
-
 @app.route("/")
 def index():
     return render_template('index.html')
