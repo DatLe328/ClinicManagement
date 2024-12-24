@@ -261,15 +261,16 @@ def doctor_get_user_by_user_id():
     err_msg = ''
     action = request.form.get('action')
     user_id = request.form.get('user_id')
+    user_info = dao.load_users_by_user_id(user_id=user_id)
+    user_id_in_phieu_kham = user_id
     if action == "search_patient":
-        if user_id:
-            user = dao.get_user_by_id(user_id)
-            if user:
-                return render_template("doctor.html", err_msg=err_msg, search_result=user, user_id=user_id)
-            else:
-                err_msg = 'Không tồn tại bệnh nhân hoặc bệnh nhân chưa đăng ký khám'
-        return render_template("doctor.html", err_msg=err_msg)
-    else:
+        if user_info:
+            return render_template("doctor.html", err_msg=err_msg, search_result=user_info, user_id=user_id)
+        else:
+            err_msg = 'Không tồn tại bệnh nhân hoặc bệnh nhân chưa đăng ký khám'
+        return render_template("doctor.html", err_msg=err_msg, user_id=user_id)
+    
+    if action == 'add_prescription':
         medicine_name = request.form.get('medicine')
         quantity = int(request.form.get('so_luong_thuoc', 0))
 
@@ -280,10 +281,10 @@ def doctor_get_user_by_user_id():
             ma_phieu_kham_today = pk_today_for_one_user[0]
 
             if pk_today_for_one_user:
-                global user_id_in_phieu_kham
-                user_id_in_phieu_kham = pk_today_for_one_user[5]
+                # global user_id_in_phieu_kham
+                # user_id_in_phieu_kham = pk_today_for_one_user[5]
                 user_in_phieu_kham = dao.load_users_by_user_id(user_id=user_id_in_phieu_kham)
-
+                # print(user_in_phieu_kham)
                 if user_in_phieu_kham:
                     thuoc = dao.load_medicines_by_name(medicine_name)
 
@@ -302,8 +303,6 @@ def doctor_get_user_by_user_id():
                             dao.save_chi_tiet_phieu_kham(
                                 so_luong_thuoc=quantity, thuoc_id=thuoc_id, phieu_kham_id=ma_phieu_kham_today
                             )
-
-                        return render_template("doctor.html", err_msg=err_msg, user_id=user_id)
                     else:
                         err_msg = "Không có thuốc này trong cơ sở dữ liệu"
                 else:
@@ -313,7 +312,7 @@ def doctor_get_user_by_user_id():
         else:
             err_msg = "Phiếu khám chưa được tạo"
 
-    return render_template("doctor.html", err_msg=err_msg)
+    return render_template("doctor.html", err_msg=err_msg, user_id=user_id, search_result=user_info)
 
 
 
@@ -341,8 +340,14 @@ ma_phieu_kham_today = 0
 @app.route("/doctor_save_phieu_kham", methods=['GET', 'POST'])
 def doctor_save_phieu_kham():
     err_msg = ''
+    suc_msg = ''
     action = request.form.get('action')
-    if action and action.startswith('delete'):
+    user_id = request.form.get('user_id')
+    user_id_in_phieu_kham = user_id
+    # user_id = user_id_in_phieu_kham
+    user_info = dao.load_users_by_user_id(user_id=user_id)
+    
+    if action.startswith('delete'):
         try:
             medicine_id = int(action.split('-')[1])  
             prescription_id = ma_phieu_kham_today 
@@ -350,7 +355,7 @@ def doctor_save_phieu_kham():
             err_msg = f"Deleted medicine with ID {medicine_id} successfully."
         except Exception as e:
             err_msg = f"Failed to delete medicine: {str(e)}"
-    elif request.method == 'POST' and action == 'save':
+    elif action == 'save':
         phieu_kham_id = ma_phieu_kham_today
         check_pk_id = dao.load_phieu_kham_id_today_by_phieu_kham_id(phieu_kham_id=phieu_kham_id)
 
@@ -369,7 +374,7 @@ def doctor_save_phieu_kham():
 
                     if lsb_id and benh_id:
                         dao.save_chi_tiet_lich_su_benh(lich_su_benh_id=lsb_id[0][0], benh_id=benh_id[0][0])
-                        err_msg = f"Lưu thành công phiếu khám có mã phiếu là {check_pk_id_numString}"
+                        suc_msg = f"Lưu thành công phiếu khám có mã phiếu là {check_pk_id_numString}"
                     else:
                         err_msg = "Lịch sử bệnh hoặc bệnh không tồn tại trong cơ sở dữ liệu"
                 else:
@@ -378,7 +383,7 @@ def doctor_save_phieu_kham():
                 err_msg = f"An error occurred while saving the prescription: {str(e)}"
         else:
             err_msg = "Không tồn tại phiếu khám này"
-    return render_template("doctor.html", err_msg=err_msg)
+    return render_template("doctor.html", err_msg=err_msg, suc_msg=suc_msg, user_id=user_id, search_result=user_info)
 
 # =============== Payment =============== #
 @app.route("/cashier", methods=['get', 'post'])

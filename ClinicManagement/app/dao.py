@@ -388,13 +388,39 @@ def get_appointment_details(appointment_detail_id=None):
     return query.all()
 
 
-def load_users_by_user_id(user_id=None):
-    query = db.session.query(User.id, User.full_name,
-                             User.gender, User.birth_date, User.address, User.phone_number)
+# def load_users_by_user_id(user_id=None):
+#     query = db.session.query(User.id, User.full_name,
+#                              User.gender, User.birth_date, User.address, User.phone_number)
 
+#     if user_id:
+#         query = query.filter(User.id.__eq__(user_id))
+#     return query.all()
+def load_users_by_user_id(user_id=None):
+    query = db.session.query(
+        User.id, 
+        User.full_name,
+        User.gender, 
+        User.birth_date, 
+        User.address, 
+        User.phone_number
+    )
     if user_id:
-        query = query.filter(User.id.__eq__(user_id))
-    return query.all()
+        query = query.filter(User.id == user_id)
+    
+    results = query.all()
+    formatted_results = [
+        {
+            "user_id": row.id,
+            "full_name": row.full_name,
+            "gender": row.gender,
+            "birth_date": row.birth_date,
+            "address": row.address,
+            "phone_number": row.phone_number
+        }
+        for row in results
+    ]
+    return formatted_results
+
 
 
 # ====================================================================================

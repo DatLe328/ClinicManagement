@@ -92,16 +92,16 @@
                                     </tr>
                                     {% for us in appointment_user_list %}
                                         <tr>
-                                            <td>{{ us[0][0] }}</td>
-                                            <td>{{ us[0][1] }}</td>
-                                            {% if us[0][2] == True %}
+                                            <td>{{ us[0].user_id }}</td>
+                                            <td>{{ us[0].full_name }}</td>
+                                            {% if us[0].gender == True %}
                                                 <td>Nam</td>
                                             {% else %}
                                                 <td>Nữ</td>
                                             {% endif %}
-                                            <td>{{ us[0][3] }}</td>
-                                            <td>{{ us[0][5] }}</td>
-                                            <td>{{ us[0][4] }}</td>
+                                            <td>{{ us[0].birth_date }}</td>
+                                            <td>{{ us[0].phone_number }}</td>
+                                            <td>{{ us[0].address }}</td>
                                         </tr>
                                     {% endfor %}
                                 </table>
