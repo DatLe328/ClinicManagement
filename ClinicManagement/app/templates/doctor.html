@@ -8,77 +8,55 @@
             <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" rel="stylesheet"/>
         </head>
 
-        <form method="get" action="/doctor" class="d-flex">
-            <input class="form-control me-2" type="text" name="kw" placeholder="Tìm sản phẩm"/>
-            <button class="btn btn-primary" type="submit">Tìm</button>
-        </form>
-
-
-        <div class="patient-info mt-3">
-            {% if search_result %}
-                <h4>Thông tin bệnh nhân:</h4>
-                <ul>
-                    <li>ID: {{ search_result[0][0] }}</li>
-                    <li>Họ tên: {{ search_result[0][1] }}</li>
-                    <li>Giới tính: {{ search_result[0][2] }}</li>
-                    <li>Ngày sinh: {{ search_result[0][3] }}</li>
-                    <li>Địa chỉ: {{ search_result[0][4] }}</li>
-                    <li>Số điện thoại: {{ search_result[0][5] }}</li>
-                </ul>
-            {% else %}
-                <p>Không tìm thấy thông tin bệnh nhân.</p>
-            {% endif %}
-        </div>
-        </script>
         <div class="content">
             <div class="doctor row">
                 <div class="doctor-left col-md-4 col-sm-12 text-center">
-                    <form method="post" enctype="multipart/form-data" action="/doctor_get_user_by_user_id">
-                        <div class="mb-3 mt-3">
-                            <div>
-                                <h4 style="font-weight:bold">Tra cứu bệnh nhân</h4>
-                                <p>
-                                    Nếu nhập sai thì vui lòng bảo bệnh nhân đừng thanh toán và ra đăng ký khám lại vào
-                                    hôm sau
-                                </p>
-                            </div>
+                <form method="post" enctype="multipart/form-data" action="/add_prescription">
+    <div class="mb-3 mt-3">
+        <div>
+            <h4 style="font-weight:bold">Tra cứu bệnh nhân</h4>
+            <p>
+                Nếu nhập sai thì vui lòng bảo bệnh nhân đừng thanh toán và ra đăng ký khám lại vào
+                hôm sau
+            </p>
+        </div>
 
-                            <div class="m-user mb-3 mt-3">
-                                <label for="u-id" class="lb-id form-label">Mã bệnh nhân:</label>
-                                <input type="text" class="form-control" id="doctor_get_user_by_user_id"
-                                       placeholder="Nhập mã bệnh nhân" name="doctor_get_user_by_user_id" value="{{ tmp }}">
-                            </div>
-                        </div>
-                        <hr>
-                        <div class="mb-3 mt-3">
-                            <div class="mb-3 mt-3">
-                                <div>
-                                    <h4 style="font-weight:bold">Tra cứu thuốc</h4>
-                                    <p>Nếu <b>không nhập thuốc</b> thì nó sẽ là <b>tra cứu phiếu khám</b> theo mã bệnh
-                                        nhân</p>
-                                </div>
-                                <div class="m-medicine mb-3 mt-3">
-                                    <label class="form-label">Nhập thuốc:</label>
-                                    <input class="form-control" list="medicines" name="medicine" id="medicine">
-                                    <datalist id="medicines">
-                                        {% for t in medicines %}
-                                            <option value="{{ t.name }}">
-                                        {% endfor %}
-                                    </datalist>
-                                </div>
-                                <div class="m-quantity mb-2 mt-2">
-                                    <label class="form-label">Số lượng:</label>
-                                    <input type="number" min="1" value="1" class="form-control" name="so_luong_thuoc"/>
-                                </div>
-                            </div>
-                            <button class="bt-add btn btn-primary" type="submit">Thêm</button>
-                        </div>
-                        {% if err_msg %}
-                            <div class="alert alert-danger">
-                                {{ err_msg }}
-                            </div>
-                        {% endif %}
-                    </form>
+        <div class="m-user mb-3 mt-3">
+            <label for="u-id" class="lb-id form-label">Mã bệnh nhân:</label>
+            <input type="text" class="form-control" placeholder="Nhập mã bệnh nhân" name="user_id" value="{{ user_id }}">
+            <button class="btn btn-primary" type="submit" name="action" value="search_patient">Tìm</button>
+        </div>
+    </div>
+    <hr>
+    <div class="mb-3 mt-3">
+        <div class="mb-3 mt-3">
+            <div>
+                <h4 style="font-weight:bold">Tra cứu thuốc</h4>
+                <p>Nếu <b>không nhập thuốc</b> thì nó sẽ là <b>tra cứu phiếu khám</b> theo mã bệnh
+                    nhân</p>
+            </div>
+            <div class="m-medicine mb-3 mt-3">
+                <label class="form-label">Nhập thuốc:</label>
+                <input class="form-control" list="medicines" name="medicine" id="medicine">
+                <datalist id="medicines">
+                    {% for t in medicines %}
+                        <option value="{{ t.name }}">
+                    {% endfor %}
+                </datalist>
+            </div>
+            <div class="m-quantity mb-2 mt-2">
+                <label class="form-label">Số lượng:</label>
+                <input type="number" min="1" value="1" class="form-control" name="so_luong_thuoc"/>
+            </div>
+        </div>
+        <button class="bt-add btn btn-primary" type="submit" name="action" value="add_prescription">Thêm</button>
+    </div>
+    {% if err_msg %}
+        <div class="alert alert-danger">
+            {{ err_msg }}
+        </div>
+    {% endif %}
+</form>
                 </div>
 
 

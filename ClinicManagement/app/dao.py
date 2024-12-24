@@ -128,10 +128,10 @@ def load_users():
     return User.query.all()
 
 
-def get_users_by_phone(so_dien_thoai=None):
+def get_users_by_phone(phone_number=None):
     query = db.session.query(User.id, User.full_name, User.phone_number)
-    if so_dien_thoai:
-        query = query.filter(User.phone_number.__eq__(so_dien_thoai))
+    if phone_number:
+        query = query.filter(User.phone_number.__eq__(phone_number))
     return query.all()
 
 
@@ -271,11 +271,10 @@ def load_danh_sach_kham():
     return db.session.query(AppointmentList.id, AppointmentList.name, AppointmentList.date).all()
 
 
-def create_danh_sach_kham(create):
-    if create.__eq__("Tạo danh sách"):
-        dsk = AppointmentList(name='ds', date=datetime.now())
-        db.session.add(dsk)
-        db.session.commit()
+def create_appointment_list():
+    dsk = AppointmentList()
+    db.session.add(dsk)
+    db.session.commit()
 
 
 def get_appointments_for_today():
@@ -286,8 +285,8 @@ def get_appointments_for_today():
     return query.all()
 
 
-def create_appointment_detail(danh_sach_kham_id, user_id):
-    ctdsk = AppointmentDetail(appointment_list_id=danh_sach_kham_id, user_id=user_id)
+def create_appointment_detail(adppointment_id, user_id):
+    ctdsk = AppointmentDetail(appointment_list_id=adppointment_id, user_id=user_id)
     db.session.add(ctdsk)
     db.session.commit()
 
@@ -315,18 +314,33 @@ def get_user_in_danh_sach_kham():
     return query.all()
 
 
-def load_DSK_today():
+def get_appointment(appointment_id=None):
     query = db.session.query(AppointmentList.id, AppointmentList.name, AppointmentList.date)
+    if appointment_id:
+        query = query.filter(AppointmentList.id.__eq__(appointment_id))
+    return query.all()
+
+def get_appointment_today():
+    query = db.session.query(
+        AppointmentList.id,
+        AppointmentList.name,
+        AppointmentList.date
+    )
     today = datetime.now()
     todayString = str(today)[0:10]
     query = query.filter(AppointmentList.date.__eq__(todayString))
     return query.all()
 
 
-def load_chi_tiet_DSK_today(danh_sach_kham_id):
-    query = db.session.query(AppointmentDetail.id, AppointmentDetail.appointment_list_id, AppointmentDetail.user_id)
-    if danh_sach_kham_id:
-        query = query.filter(AppointmentDetail.appointment_list_id.__eq__(danh_sach_kham_id))
+def get_appointment_details(appointment_detail_id=None):
+
+    query = db.session.query(
+        AppointmentDetail.id.label('appointment_detail_id'),
+        AppointmentDetail.appointment_list_id.label('appointment_list_id'),
+        AppointmentDetail.user_id.label('user_id')
+    )
+    if appointment_detail_id:
+        query = query.filter(AppointmentDetail.appointment_list_id.__eq__(appointment_detail_id))
     return query.all()
 
 
@@ -351,27 +365,8 @@ def create_prescription(user_id):
     prescription = Prescription(user_id=user_id, date=datetime.now())
     db.session.add(prescription)
     db.session.commit()
-    return prescription  # Trả về đối tượng Prescription
+    return prescription
 
-
-def create_phieu_kham_auto(user_id=None):
-    pk = Prescription(user_id=user_id)
-    db.session.add(pk)
-    db.session.commit()
-
-
-def load_phieu_kham_today_by_user_id(user_id=None):
-    query = db.session.query(Prescription.id, Prescription.name, Prescription.date, Prescription.symptoms,
-                             Prescription.diagnosis, Prescription.user_id)
-
-    today = datetime.now()
-    todayString = str(today)[0:10]
-    query = query.filter(Prescription.date.__eq__(todayString))
-
-    if user_id:
-        query = query.filter(Prescription.user_id.__eq__(user_id))
-
-    return query.all()
 
 
 def get_prescriptions_for_today(user_id=None):
@@ -494,7 +489,8 @@ def load_lich_su_benh_in_view(user_id=None):
         MedicalHistory.user_id.label('user_id'),
         User.full_name.label('full_name'),
         Prescription.date.label('date'),
-        Prescription.diagnosis, Prescription.id.label('prescription_id')
+        Prescription.diagnosis.label('diagnosis'),
+        Prescription.id.label('prescription_id')
         ) \
         .join(User, User.id.__eq__(MedicalHistory.user_id)) \
         .join(Prescription, Prescription.user_id.__eq__(User.id))
@@ -513,3 +509,5 @@ def get_appointment_counts_for_today():
 
     return query.group_by(AppointmentList.id).all()
 # ====================================================================================
+
+

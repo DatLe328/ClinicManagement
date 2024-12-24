@@ -33,22 +33,28 @@
                     <div class="content">
                         <h1 style="font-weight: bold">LỊCH SỬ BỆNH</h1>
                         <hr>
-                        {% if current_user.user_role.value == 4 or current_user.user_role.value == 5 %}
-                            {#                             <form method="get" action="/lich_su_benh" class="d-flex">#}
-                            {#                                <input class="form-control me-2" type="text" name="kw" placeholder="Tìm sản phẩm"/>#}
-                            {#                                <button class="btn btn-primary" type="submit">Tìm</button>#}
-                            {#                            </form>#}
-                            <form class="null" method="post" enctype="multipart/form-data"
-                                  action="/lay_ma_benh_nhan_xem_lich_su_benh">
-                                <div class="null">
-                                    <input type="text" class="form-control" required id="id_benh_nhan"
-                                           placeholder="Nhập mã bệnh nhân..."
-                                           name="id_benh_nhan">
-                                </div>
-                                <div class="mt-1 mb-1">
-                                    <button type="submit" class="btn btn-primary">Tìm kiếm</button>
-                                </div>
+                        {% if current_user.user_role.value != 1 %}
+                            <form method="get" action="/medical_history" class="d-flex">
+                                <input class="form-control me-2" type="text" name="kw" placeholder="Mã bệnh nhân"/>
+                                <button class="btn btn-primary" type="submit">Tìm</button>
+
                             </form>
+                            <div class="mt-3">
+                                    {% if search_result %}
+                                        <p>Đã tìm thấy</p>
+                                        <h4>Thông tin bệnh nhân:</h4>
+                                        <ul>
+                                            <li>ID: {{ search_result }}</li>
+                                            {#                                                    <li>Họ tên: {{ search_result[0][1] }}</li>#}
+                                            {#                                                    <li>Giới tính: {{ search_result[0][2] }}</li>#}
+                                            {#                                                    <li>Ngày sinh: {{ search_result[0][3] }}</li>#}
+                                            {#                                                    <li>Địa chỉ: {{ search_result[0][4] }}</li>#}
+                                            {#                                                    <li>Số điện thoại: {{ search_result[0][5] }}</li>#}
+                                        </ul>
+                                    {% else %}
+                                        <p>Không tìm thấy thông tin bệnh nhân.</p>
+                                    {% endif %}
+                                </div>
                             {% if err_msg %}
                                 <div class="alert alert-danger">
                                     {{ err_msg }}
@@ -98,39 +104,25 @@
                                                                     <th>Name</th>
                                                                     <th>Quantity</th>
                                                                     <th>Description</th>
+                                                                    <th></th>
                                                                 </tr>
                                                                 </thead>
                                                                 <tbody>
-                                                                {% if all_medical_history %}
-                                                                    {% for record in all_medical_history %}
-                                                                        {% if record.prescription_id == lsb.prescription_id %}
-                                                                            <tr>
-                                                                                <td>{{ record.medicine_name }}</td>
-                                                                                <td>{{ record.quantity }}</td>
-                                                                                <td>{{ record.description }}</td>
-                                                                            <tr>
-                                                                        {% endif %}
-                                                                    {% endfor %}
-                                                                {% endif %}
-                                                                {% if prescription %}
-                                                                    {% for record in prescription %}
-                                                                        {% if record.prescription_id == lsb.prescription_id %}
-                                                                            <tr>
-                                                                                <td>{{ record.medicine_name }}</td>
-                                                                                <td>{{ record.quantity }}</td>
-                                                                                <td>{{ record.description }}</td>
-                                                                            </tr>
-                                                                        {% endif %}
-                                                                    {% endfor %}
-                                                                {% endif %}
+                                                                {% for record in all_prescriptions %}
+                                                                    {% if record.prescription_id == lsb.prescription_id %}
+                                                                        <tr>
+                                                                            <td>{{ record.medicine_name }}</td>
+                                                                            <td>{{ record.quantity }}</td>
+                                                                            <td>{{ record.description }}</td>
+                                                                        </tr>
+                                                                    {% endif %}
+                                                                {% endfor %}
                                                                 </tbody>
                                                             </table>
                                                         </div>
                                                         <div class="modal-footer">
-                                                            <button type="button" class="btn btn-secondary"
+                                                            <button type="button" class="btn btn-primary"
                                                                     data-bs-dismiss="modal">Đóng
-                                                            </button>
-                                                            <button type="button" class="btn btn-primary">Hiểu rồi
                                                             </button>
                                                         </div>
                                                     </div>

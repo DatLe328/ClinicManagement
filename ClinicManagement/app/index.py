@@ -14,8 +14,6 @@ def doctor():
     kw = request.args.get('kw')
     info = dao.load_users_by_user_id(kw)
     patients = dao.load_users()
-    print(info)
-
 
     return render_template("doctor.html", patients=patients, search_result=info)
 

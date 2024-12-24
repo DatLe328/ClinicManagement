@@ -16,7 +16,6 @@ class UserRole(RoleEnum):
 
 class BaseModel(db.Model):
     __abstract__ = True
-
     id = Column(Integer, primary_key=True, autoincrement=True)
 
 
@@ -58,7 +57,7 @@ class User(BaseModel, UserMixin):
     medical_history = relationship("MedicalHistory", backref="user", lazy=True, uselist=False)
 
     def __str__(self):
-        return self.name
+        return self.full_name
 
 
 class Invoice(BaseModel):
@@ -133,7 +132,7 @@ if __name__ == '__main__':
         import hashlib
 
         password = "123"
-        password_admin = "123456"
+        password_admin = "123"
         password = str(hashlib.md5(password.encode('utf-8')).hexdigest())
         password_admin = str(hashlib.md5(password_admin.encode('utf-8')).hexdigest())
 
@@ -171,9 +170,9 @@ if __name__ == '__main__':
         m6 = Medicine(name="Probiotic", price=15000, unit="Packet", description="Oral", category_id=3)
 
         # Seed Prescriptions
-        p1 = Prescription(name="Prescription 1", symptoms="Stomachache", diagnosis="Stomach Ulcer", user_id=5)
-        p2 = Prescription(name="Prescription 2", symptoms="Back pain", diagnosis="Spinal Degeneration", user_id=3)
-        p3 = Prescription(name="Prescription 3", symptoms="Heart pain", diagnosis="Heart Attack", user_id=4)
+        p1 = Prescription(name="Prescription 1", symptoms="Stomachache", diagnosis="Stomach Ulcer", user_id=3, date=date(2024,1,1))
+        p2 = Prescription(name="Prescription 2", symptoms="Back pain", diagnosis="Spinal Degeneration", user_id=4,date=date(2024,1,1))
+        p3 = Prescription(name="Prescription 3", symptoms="Heart pain", diagnosis="Heart Attack", user_id=5,date=date(2024,1,2))
 
         # Seed Prescription Details
         pd1_p1 = PrescriptionDetail(quantity=3, medicine_id=3, prescription_id=1)
@@ -186,12 +185,12 @@ if __name__ == '__main__':
 
         # Seed Appointment Lists
         al1 = AppointmentList(name="Appointment List 1", date=date(2024,1,1))
-        al2 = AppointmentList(name="Appointment List 2", date=date(2024,2,1))
+        al2 = AppointmentList(name="Appointment List 2", date=date(2024,1,2))
 
         # Seed Appointment List Details
         ald1_al1 = AppointmentDetail(appointment_list_id=1, user_id=3)
-        ald2_al1 = AppointmentDetail(appointment_list_id=1, user_id=5)
-        ald1_al2 = AppointmentDetail(appointment_list_id=2, user_id=4)
+        ald2_al1 = AppointmentDetail(appointment_list_id=1, user_id=4)
+        ald1_al2 = AppointmentDetail(appointment_list_id=2, user_id=5)
 
         # Seed Diseases
         d1 = Disease(name="Back pain")
@@ -202,8 +201,8 @@ if __name__ == '__main__':
 
         # Seed Medical Histories
         mh1 = MedicalHistory(name="Medical History 1", user_id=3)
-        mh2 = MedicalHistory(name="Medical History 2", user_id=5)
-        mh3 = MedicalHistory(name="Medical History 3", user_id=4)
+        mh2 = MedicalHistory(name="Medical History 2", user_id=4)
+        mh3 = MedicalHistory(name="Medical History 3", user_id=5)
 
         # Seed Medical History Details
         mhd1_mh1 = MedicalHistoryDetail(medical_history_id=1, disease_id=1)
@@ -214,14 +213,9 @@ if __name__ == '__main__':
         mhd1_mh3 = MedicalHistoryDetail(medical_history_id=3, disease_id=5)
 
         # Seed Invoices
-        i1 = Invoice(name="Invoice 1", total_amount=1000000, user_id=3, date=date(2024, 1, 2))
-        i2 = Invoice(name="Invoice 2", total_amount=2000000, user_id=5, date=date(2024, 1, 3))
-        i3 = Invoice(name="Invoice 3", total_amount=4000000, user_id=4, date=date(2024, 1, 4))
-        i4 = Invoice(name="Invoice 4", total_amount=2600000, user_id=2)
-        i5 = Invoice(name="Invoice 5", total_amount=1700000, user_id=5)
-        i6 = Invoice(name="Invoice 6", total_amount=2000000, user_id=1)
-        i7 = Invoice(name="Invoice 7", total_amount=1400000, user_id=3)
-        i8 = Invoice(name="Invoice 8", total_amount=2400000, user_id=1)
+        i1 = Invoice(name="Invoice 1", total_amount=1000000, user_id=3, date=date(2024, 1, 1))
+        i2 = Invoice(name="Invoice 2", total_amount=2000000, user_id=4, date=date(2024, 1, 1))
+        i3 = Invoice(name="Invoice 3", total_amount=4000000, user_id=5, date=date(2024, 1, 2))
 
         # Add all data to the session
         db.session.add_all([u1, u2, u3, u4, u5, u6])
@@ -234,7 +228,7 @@ if __name__ == '__main__':
         db.session.add_all([ald1_al1, ald2_al1, ald1_al2])
         db.session.add_all([mh1, mh2, mh3])
         db.session.add_all([mhd1_mh1, mhd2_mh1, mhd3_mh1, mhd1_mh2, mhd2_mh2, mhd1_mh3])
-        db.session.add_all([i1, i2, i3, i4, i5, i6, i7, i8])
+        db.session.add_all([i1, i2, i3])
 
         # pp = Prescription(name="Prescription 1", symptoms="Stomachache", diagnosis="Stomach Ulcer", user_id=1,
         #                   date=date(2024, 12, 19))

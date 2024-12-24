@@ -1,5 +1,3 @@
-from statistics import median
-
 from flask import flash, render_template, request, redirect, jsonify, session, url_for
 import dao, utils, json
 from flask_login import login_user, logout_user, login_required, current_user
@@ -66,12 +64,12 @@ def register_process():
         sex = request.form.get('sex')
         avatar = request.files.get('avatar')
 
-        existing_user = dao.get_user_by_username(username)
+        existing_user = dao.get_user_by_username(username=username)
         if existing_user:
             err_msg = "Tên đăng nhập đã tồn tại. Vui lòng sử dụng tên khác."
         elif password != confirm:
             err_msg = "Mật khẩu và xác nhận mật khẩu KHÔNG khớp."
-        elif dao.get_user_by_phone(telephone):
+        elif dao.get_user_by_phone(phone_number=telephone):
             err_msg = "Số điện thoại đã được sử dụng."
         else:
             import hashlib
@@ -149,103 +147,105 @@ def load_user(user_id):
 
 
 # =============== User registers for a medical appointment =============== #
-@app.route("/user_dang_ky_kham", methods=['get', 'post'])
+@app.route("/user_dang_ky_kham", methods=['GET', 'POST'])
 def user_dang_ky_kham():
     err_msg = ''
-    if request.method == ('POST'):
+    if request.method == 'POST':
         with open("app/data/rules.json", "r") as file:
             rules = json.load(file)
+        phone_number_input = request.form['user_dang_ky_kham']
+        max_patient_limit = int(rules.get("so_benh_nhan", 0))
 
-            phone_number_input = request.form['user_dang_ky_kham']
+        patient = dao.get_users_by_phone(phone_number=phone_number_input)
+        if not patient:
+            err_msg = "Không tồn tại user trong cơ sở dữ liệu"
+            return render_template("index.html", err_msg=err_msg)
 
-            benh_nhan = dao.get_users_by_phone(phone_number_input)
-            if benh_nhan and current_user.user_role == UserRole.USER:
-                if current_user.id != benh_nhan[0][0]:
-                    err_msg = "Bạn không có SDT này hoặc bạn chưa thêm SDT này"
-                    return render_template("index.html", err_msg=err_msg)
+        if current_user.user_role == UserRole.USER and current_user.id != patient[0][0]:
+            err_msg = "Bạn không có SDT này hoặc bạn chưa thêm SDT này"
+            return render_template("index.html", err_msg=err_msg)
 
-            if benh_nhan:
-                patients_registered_today = dao.load_chi_tiet_danh_sach_kham_today(benh_nhan[0][0])
-                if patients_registered_today:
-                    err_msg = "Bạn đã đăng ký rồi"
-                else:
-                    registered_patient_count = dao.get_appointment_counts_for_today()
-                    if registered_patient_count:
-                        registered_patient_count = registered_patient_count[0][1]
-                        max_patient_limit = rules["so_benh_nhan"]
-                        if int(registered_patient_count) < int(max_patient_limit):
-                            appointment_schedule_today = dao.get_appointments_for_today()
-                            if appointment_schedule_today:
-                                dao.create_appointment_detail(appointment_schedule_today[0][0], benh_nhan[0][0])
-                                err_msg = 'Đăng ký thành công'
-                                lsb_for_one_user = dao.load_lich_su_benh(user_id=benh_nhan[0][0])
-                                if lsb_for_one_user:
-                                    pass
-                                else:
-                                    dao.add_medical_history(user_id=benh_nhan[0][0])
-                            else:
-                                err_msg = "Chưa có danh sách để đăng ký"
-                        else:
-                            err_msg = "Số lượng bệnh nhân trong danh sách đã đầy, vui lòng đăng ký khám vào hôm sau"
-                    else:
-                        registered_patient_count = 0
-                        if registered_patient_count == 0:
-                            max_patient_limit = rules["so_benh_nhan"]
-                            if registered_patient_count < int(max_patient_limit):
-                                appointment_schedule_today = dao.get_appointments_for_today()
-                                if appointment_schedule_today:
-                                    dao.create_appointment_detail(appointment_schedule_today[0][0], benh_nhan[0][0])
-                                    err_msg = 'Đăng ký thành công'
-                                    lsb_for_one_user = dao.load_lich_su_benh(user_id=benh_nhan[0][0])
-                                    if lsb_for_one_user:
-                                        pass
-                                    else:
-                                        dao.add_medical_history(user_id=benh_nhan[0][0])
-                                else:
-                                    err_msg = "Chưa có danh sách để đăng ký"
-                            else:
-                                err_msg = "Có lỗi xảy ra"
-                        else:
-                            err_msg = "Có lỗi xảy ra"
+        user_id = patient[0][0]
 
-            else:
-                err_msg = "Không tồn tại user trong cơ sở dữ liệu"
+        if dao.load_chi_tiet_danh_sach_kham_today(user_id=user_id):
+            err_msg = "Bạn đã đăng ký rồi"
+            return render_template("index.html", err_msg=err_msg)
+
+        registered_patient_count = dao.get_appointment_counts_for_today()
+        registered_patient_count = int(registered_patient_count[0][1]) if registered_patient_count else 0
+
+        if registered_patient_count >= max_patient_limit:
+            err_msg = "Số lượng bệnh nhân trong danh sách đã đầy, vui lòng đăng ký khám vào hôm sau"
+            return render_template("index.html", err_msg=err_msg)
+
+        appointment_schedule_today = dao.get_appointments_for_today()
+        if not appointment_schedule_today:
+            err_msg = "Chưa có danh sách để đăng ký"
+            return render_template("index.html", err_msg=err_msg)
+
+        dao.create_appointment_detail(adppointment_id=appointment_schedule_today[0][0], user_id=user_id)
+        err_msg = "Đăng ký thành công"
+
+        if not dao.load_lich_su_benh(user_id=user_id):
+            dao.add_medical_history(user_id=user_id)
 
     return render_template("index.html", err_msg=err_msg)
 
-
 # =============== Create appointment =============== #
-@app.route("/create_danh_sach_kham_for_nurse", methods=['get', 'post'])
+@app.route("/create_appointment", methods=['get', 'post'])
 def create_danh_sach_kham_for_nurse():
     err_msg = ''
-    if request.method == ('POST'):
+    if request.method == 'POST':
 
-        danh_sach_kham_hom_nay = dao.get_appointments_for_today()
-        if danh_sach_kham_hom_nay:
+        appointments_today = dao.get_appointments_for_today()
+        if appointments_today:
             err_msg = "Đã tạo danh sách khám cho hôm nay rồi"
         else:
-            create_list = request.form['create_list']
-            dao.create_danh_sach_kham(create_list)
-            ma_phieu_kham_today = dao.get_newest_appoinment_id()
+            # create_list = request.form['create_list']
+            dao.create_appointment_list()
+            # ma_phieu_kham_today = dao.get_newest_appoinment_id()
+            err_msg = 'Tạo danh sách khám thành công'
             return redirect('/nurse')
     return render_template("nurse.html", err_msg=err_msg)
+
+@app.route("/load_appointment", methods=['get', 'post'])
+def load_appointment_process():
+    err_msg = ''
+    user_list = []
+
+    try:
+        appointment_id = request.form.get('button_value')
+        if appointment_id:
+            appointment_details = dao.get_appointment_details(appointment_id)
+            for i in appointment_details:
+                user_list.append(dao.load_users_by_user_id(i.user_id))
+
+            if not user_list:
+                err_msg = f"Không tìm thấy bệnh nhân nào thuộc danh sách"
+        else:
+            err_msg = "Appointment ID không hợp lệ hoặc không được gửi đến!"
+
+    except Exception as ex:
+        err_msg = f"Đã xảy ra lỗi: {str(ex)}"
+    print(user_list)
+    return render_template("nurse.html", err_msg=err_msg, appointment_user_list=user_list)
 
 
 @app.route("/save_chi_tiet_danh_sach_kham", methods=['get', 'post'])
 def save_chi_tiet_danh_sach_kham():
     err_msg = ''
-    if request.method == ('POST'):
-        dsk = dao.load_DSK_today()
-        if dsk:
-            chi_tiet_dsk = dao.load_chi_tiet_DSK_today(dsk[0][0])
-            if chi_tiet_dsk:
-                n = len(chi_tiet_dsk)
+    if request.method == 'POST':
+        appointments_today = dao.get_appointment_today()
+        if appointments_today:
+            appointment_details = dao.get_appointment_details(appointment_detail_id=appointments_today[0][0])
+            if appointment_details:
+                n = len(appointment_details)
                 for i in range(0, n):
-                    pk_today_for_one_user = dao.get_prescriptions_for_today(user_id=chi_tiet_dsk[i][2])
+                    pk_today_for_one_user = dao.get_prescriptions_for_today(user_id=appointment_details[i][2])
                     if pk_today_for_one_user:
                         err_msg = "Đã tạo phiếu cho user này rồi"
                     else:
-                        pk = dao.create_phieu_kham_auto(user_id=chi_tiet_dsk[i][2])
+                        pk = dao.create_prescription(user_id=appointment_details[i][2])
                         err_msg = "Tạo thành công phiếu khám"
             else:
                 err_msg = "Chưa có bệnh nhân nào đăng ký khám"
@@ -256,31 +256,43 @@ def save_chi_tiet_danh_sach_kham():
 
 
 # =============== Create prescription =============== #
-@app.route("/doctor_get_user_by_user_id", methods=['get', 'post'])
+@app.route("/search_patient", methods=['get'])
+def search_patient_process():
+    err_msg = ''
+    user_list = []
+
+
+@app.route("/add_prescription", methods=['get', 'post'])
 def doctor_get_user_by_user_id():
     err_msg = ''
-    if request.method == ('POST'):
-        user_id = request.form["doctor_get_user_by_user_id"]
-        action = request.form.get('action')
-        phieu_kham_da_duoc_tao = dao.get_prescriptions_for_today(user_id)
-        if phieu_kham_da_duoc_tao:
-            pk_today_for_one_user = dao.load_phieu_kham_today_by_user_id(user_id)
-            global ma_phieu_kham_today
-            ma_phieu_kham_today = pk_today_for_one_user[0][0]
+    action = request.form.get('action')
+    user_id = request.form.get('user_id')
+    if action == "search_patient":
+        if user_id:
+            user = dao.get_user_by_id(user_id)
+            print(user)
+            if user:
+                return render_template("doctor.html", err_msg=err_msg, search_result=user)
+        else:
+            err_msg='Không tồn tại bệnh nhân hoặc bệnh nhân chưa đăng ký khám'
+        render_template("doctor.html", err_msg=err_msg)
+    else:
+        medicine = request.form.get('medicine')
+        quantity = request.form.get('so_luong_thuoc')
+        user_prescriptions = dao.get_prescriptions_for_today(user_id=user_id)
+        if user_prescriptions:
+            pk_today_for_one_user = dao.get_prescriptions_for_today(user_id=user_id)
             if pk_today_for_one_user:
                 global user_id_in_phieu_kham
                 user_id_in_phieu_kham = pk_today_for_one_user[0][5]
-                user_in_phieu_kham = dao.load_users_by_user_id(user_id_in_phieu_kham)
-                # LƯU THUỐC CHO BỆNH NHÂN
+                user_in_phieu_kham = dao.load_users_by_user_id(user_id=user_id_in_phieu_kham)
                 if user_in_phieu_kham:
-                    ten_thuoc = request.form["medicine"]
-                    so_luong_thuoc = request.form["so_luong_thuoc"]
-                    thuoc = dao.load_medicines_by_name(ten_thuoc)
+                    thuoc = dao.load_medicines_by_name(medicine)
                     if thuoc:
-                        dao.save_chi_tiet_phieu_kham(so_luong_thuoc=so_luong_thuoc, thuoc_id=thuoc[0][0],
+                        dao.save_chi_tiet_phieu_kham(so_luong_thuoc=quantity, thuoc_id=thuoc[0][0],
                                                      phieu_kham_id=pk_today_for_one_user[0][0])
 
-                        return render_template("doctor.html", err_msg=err_msg, tmp=user_id)
+                        return render_template("doctor.html", err_msg=err_msg, user_id=user_id)
                     else:
                         err_msg = "Không có thuốc này trong cơ sở dữ liệu"
                 else:
@@ -293,23 +305,6 @@ def doctor_get_user_by_user_id():
 
 
 user_id_in_phieu_kham = 0
-ma_phieu_kham_today = 0
-
-
-@app.context_processor
-def load_users_by_user_id_view():
-    user_id_view = dao.load_users_by_user_id(user_id_in_phieu_kham)
-    return {
-        "user_id_view": user_id_view
-    }
-
-
-@app.context_processor
-def load_prescription_details_today():
-    prescription_details_today = dao.load_prescription_details_today(ma_phieu_kham_today)
-    return {
-        "prescription_details_today": prescription_details_today
-    }
 
 
 @app.context_processor
@@ -319,6 +314,15 @@ def load_thuoc_trong_chi_tiet_pk():
     return {
         'thuoc_trong_ctpk': thuoc_trong_ctpk
     }
+
+
+@app.context_processor
+def get_danh_sach_kham():
+    danh_sach_kham = dao.load_danh_sach_kham()
+    return {
+        'danh_sach_kham': danh_sach_kham
+    }
+
 
 
 @app.route("/doctor_save_phieu_kham", methods=['get', 'post'])
@@ -400,38 +404,6 @@ def get_disease():
 
 
 @app.context_processor
-def get_danh_sach_kham():
-    danh_sach_kham = dao.load_danh_sach_kham()
-    return {
-        'danh_sach_kham': danh_sach_kham
-    }
-
-
-@app.context_processor
-def get_user_in_danh_sach_kham():
-    get_user_in_danh_sach_kham = dao.get_user_in_danh_sach_kham()
-    return {
-        'get_user_in_danh_sach_kham': get_user_in_danh_sach_kham
-    }
-
-
-@app.context_processor
-def get_user_in_danh_sach_kham():
-    get_user_in_danh_sach_kham = []
-    dsk = dao.load_DSK_today()
-    if dsk:
-        user_id_in_dsk = dao.load_chi_tiet_DSK_today(dsk[0][0])
-        n = len(user_id_in_dsk)
-
-        for i in range(0, n):
-            get_user_in_danh_sach_kham.append(dao.load_users_by_user_id(user_id_in_dsk[i][2]))
-
-    return {
-        'get_user_in_danh_sach_kham': get_user_in_danh_sach_kham
-    }
-
-
-@app.context_processor
 def load_hoa_don():
     danh_sach_hoa_don = dao.load_hoa_don()
     return {
@@ -449,77 +421,47 @@ def load_hoa_don_for_one_user():
 
 # =============== Medical history =============== #
 
-user_id_in_lich_su_benh_after_filter = 0
-
-
-@app.route("/lay_ma_benh_nhan_xem_lich_su_benh", methods=['GET', 'POST'])
-def lay_ma_benh_nhan_xem_lich_su_benh():
-    err_msg = ''
-    medical_history = None
-    lsb = None
-    if request.method == 'POST':
-        id_benh_nhan = request.form.get("id_benh_nhan")
-
-        if not id_benh_nhan:
-            err_msg = "Vui lòng nhập mã bệnh nhân"
-        else:
-            try:
-                medical_history = dao.load_prescription_data(id_benh_nhan)
-                lsb = dao.load_lich_su_benh_in_view(id_benh_nhan)
-                if not lsb:
-                    err_msg = "Không tồn tại bệnh nhân này"
-            except Exception as e:
-                err_msg = f"Lỗi xảy ra: {str(e)}"
-    else:
-        err_msg = "Vui lòng nhập để tìm kiếm lịch sử bệnh"
-    # print("debug /lay_ma_benh_nhan_xem_lich_su_benh:")
-    # for i in lsb:
-    #     print(i)
-    # for i in medical_history:
-    #     print(i)
-    return render_template("medical_history.html",
-                           err_msg=err_msg,
-                           prescription=medical_history,
-                           load_lich_su_benh_in_view=lsb)
-
 @app.route("/medical_history")
-def lich_su_benh():
-    print("debugg /lich_su_benh:")
+def medical_history_process():
+    medical_history_records = []
     if current_user.is_authenticated:
-        lsb_for_crr = dao.load_lich_su_benh_in_view()
-    all_users = dao.load_users()
+        medical_history_records = dao.load_lich_su_benh_in_view()
+    kw = request.args.get('kw')
+    err_msg = ''
     all_prescriptions = []
-    all_medical_history = []
-    for user in all_users:
-        user_prescription_data = dao.load_prescription_data(user.id)
-        if user_prescription_data:
-            all_prescriptions.append({"user": user, "prescription": user_prescription_data})
+    if kw:
+        all_prescriptions = dao.load_prescription_data(user_id=kw)
+        if all_prescriptions:
+            medical_history_records = dao.load_lich_su_benh_in_view(user_id=kw)
+        else:
+            medical_history_records = []
+    else:
+        all_users = dao.load_users()
+        for user in all_users:
+            user_prescription_data = dao.load_prescription_data(user_id=user.id)
+            if user_prescription_data:
+                data = {'user': user, 'prescription': user_prescription_data}
+                for i in data['prescription']:
+                    all_prescriptions.append(i)
 
-    for i in all_prescriptions:
-        for j in i['prescription']:
-            all_medical_history.append(j)
-    for i in lsb_for_crr:
-        print(i)
-    for i in all_medical_history:
-        print(i)
-    return render_template("medical_history.html", load_lich_su_benh_in_view=lsb_for_crr, all_medical_history=all_medical_history)
 
-
+    if not all_prescriptions:
+        err_msg = 'Không tìm thấy bệnh nhân'
+    return render_template("medical_history.html", err_msg=err_msg, load_lich_su_benh_in_view=medical_history_records, all_prescriptions=all_prescriptions)
 
 # =============== API =============== #
-@app.route('/api/users', methods=['GET'])
-def get_all_users():
-    users = dao.load_users()
-    user_list = []
-    for user in users:
-        user_list.append({
-            "id": user.id,
-            "full_name": user.full_name,
-            "username": user.username,
-            "phone_number": user.phone_number,
-            "address": user.address,
-            "gender": user.gender,
-            "birth_date": user.birth_date,
-            "avatar": user.avatar
-        })
-    return jsonify(user_list)
+
+
+# =============== CONTEXT PROCESSOR =============== #
+@app.context_processor
+def load_appointment_user_list():
+    appointment_user_list = []
+    dsk = dao.get_appointment_today()
+    if dsk:
+        user_id_in_dsk = dao.get_appointment_details(dsk[0][0])
+        n = len(user_id_in_dsk)
+        for i in range(0, n):
+            appointment_user_list.append(dao.load_users_by_user_id(user_id_in_dsk[i][2]))
+    return {
+        'appointment_user_list': appointment_user_list
+    }
