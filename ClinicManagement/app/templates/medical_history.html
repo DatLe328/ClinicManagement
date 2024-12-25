@@ -7,7 +7,14 @@
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" rel="stylesheet"/>
     </head>
 
-
+    <p>
+    {{ patient_prescription }}
+    </p>
+    <p>
+    {% for i in all_prescriptions %}
+        <p>{{ i }}</p>
+    {% endfor %}
+    </p>
     <div class="history_medical container-fluid">
         {% if current_user.is_authenticated %}
             <div class="user row">
@@ -48,34 +55,37 @@
                         <div class="history">
                             <table class="table">
                                 <tr>
-                                    <th>Mã lịch sử bệnh</th>
+                                    <th>Mã đơn thuốc</th>
                                     <th>Mã bệnh nhân</th>
                                     <th>Tên bệnh nhân</th>
+                                    <th>Triệu chứng</th>
                                     <th>Tên bệnh</th>
                                     <th>Ngày khám</th>
                                     <th>Đơn thuốc</th>
                                 </tr>
-                                {% for lsb in load_lich_su_benh_in_view %}
+                                {% for lsb in patient_prescription %}
                                     <tr>
-                                        <td>{{ lsb.history_id }}</td>
+                                        <td>{{ lsb.prescription_id }}</td>
                                         <td>{{ lsb.user_id }}</td>
                                         <td>{{ lsb.full_name }}</td>
+                                        <td>{{ lsb.symptoms }}</td>
                                         <td>{{ lsb.diagnosis }}</td>
                                         <td>{{ lsb.date }}</td>
                                         <td>
                                             <button type="button" class="btn btn-primary" data-bs-toggle="modal"
-                                                    data-bs-target="#modal-{{ lsb.history_id }}" data-toggle="tooltip" data-placement="right" title="Xem lịch sử bệnh">
-                                                <i class="fa fa-eye"></i>
+                                                    data-bs-target="#modal-{{ lsb.prescription_id }}" data-toggle="tooltip"
+                                                    data-placement="right" title="Xem chi tiết">
+                                                    <i class="fa fa-eye"></i>
                                             </button>
-                                            <div class="modal fade" id="modal-{{ lsb.history_id }}"
+                                            <div class="modal fade" id="modal-{{ lsb.prescription_id }}"
                                                  data-bs-backdrop="static"
                                                  data-bs-keyboard="false" tabindex="-1"
-                                                 aria-labelledby="modalLabel-{{ lsb.history_id }}" aria-hidden="true">
+                                                 aria-labelledby="modalLabel-{{ lsb.prescription_id }}" aria-hidden="true">
                                                 <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                                                     <div class="modal-content">
                                                         <div class="modal-header">
                                                             <h5 class="modal-title"
-                                                                id="modalLabel-{{ lsb.history_id }}">Chi tiết bệnh
+                                                                id="modalLabel-{{ lsb.prescription_id }}">Chi tiết bệnh
                                                                 án</h5>
                                                             <button type="button" class="btn-close"
                                                                     data-bs-dismiss="modal"
@@ -88,7 +98,7 @@
                                                                     <th>Name</th>
                                                                     <th>Quantity</th>
                                                                     <th>Description</th>
-                                                                    <th></th>
+                                                                    <th>Date</th>
                                                                 </tr>
                                                                 </thead>
                                                                 <tbody>
@@ -98,6 +108,7 @@
                                                                             <td>{{ record.medicine_name }}</td>
                                                                             <td>{{ record.quantity }}</td>
                                                                             <td>{{ record.description }}</td>
+                                                                            <td>{{ record.date }}</td>
                                                                         </tr>
                                                                     {% endif %}
                                                                 {% endfor %}

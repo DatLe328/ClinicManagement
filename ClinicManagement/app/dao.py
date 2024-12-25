@@ -1,3 +1,5 @@
+from sqlalchemy.orm import joinedload
+
 from app.models import *
 from app import app, db
 import hashlib
@@ -7,6 +9,23 @@ from sqlalchemy import func
 from sqlalchemy.sql.functions import user
 
 # ========================== TEST ZONE ========================== #
+
+def get_invoice_details_by_user_id(user_id):
+    query = db.session.query(Invoice.id, Invoice.date, Invoice.total_amount) \
+        .filter(Invoice.user_id == user_id)
+    return query.all()
+
+def get_invoice_ids_by_user_id(user_id):
+    try:
+        # Query the Invoice table to find all invoices for the user
+        invoices = Invoice.query.filter_by(user_id=user_id).all()
+        return [invoice.id for invoice in invoices]
+    except Exception as e:
+        print(f"Error retrieving invoice IDs for user {user_id}: {str(e)}")
+        return []
+
+
+
 def delete_medicine_from_prescription(medicine_id, prescription_id):
     try:
         db.session.query(PrescriptionDetail).filter(
@@ -17,30 +36,17 @@ def delete_medicine_from_prescription(medicine_id, prescription_id):
     except Exception as e:
         print(f"Error deleting medicine from prescription: {e}")
         db.session.rollback()
-def check_existing_medicine_in_prescription(thuoc_id, phieu_kham_id):
-    """
-    Check if a medicine already exists in the prescription.
-    """
+def check_existing_medicine_in_prescription(medicine_id, prescription_id):
     return db.session.query(PrescriptionDetail).filter(
-        PrescriptionDetail.medicine_id == thuoc_id,
-        PrescriptionDetail.prescription_id == phieu_kham_id
+        PrescriptionDetail.medicine_id == medicine_id,
+        PrescriptionDetail.prescription_id == prescription_id
     ).first()
-def check_existing_medicine_in_prescription(thuoc_id, phieu_kham_id):
-    """
-    Check if a medicine already exists in the prescription.
-    """
-    return db.session.query(PrescriptionDetail).filter(
-        PrescriptionDetail.medicine_id == thuoc_id,
-        PrescriptionDetail.prescription_id == phieu_kham_id
-    ).first()
-def update_medicine_quantity_in_prescription(thuoc_id, phieu_kham_id, new_quantity):
-    """
-    Update the quantity of a medicine in the prescription.
-    """
+
+def update_medicine_quantity_in_prescription(medicine_id, prescription_id, new_quantity):
     try:
         prescription_detail = db.session.query(PrescriptionDetail).filter(
-            PrescriptionDetail.medicine_id == thuoc_id,
-            PrescriptionDetail.prescription_id == phieu_kham_id
+            PrescriptionDetail.medicine_id == medicine_id,
+            PrescriptionDetail.prescription_id == prescription_id
         ).first()
         if prescription_detail:
             prescription_detail.quantity = new_quantity
@@ -236,18 +242,39 @@ def stats_by_revenue(month=None):
 
 # ====================================================================================
 def bill_for_one_user_by_id(user_id):
-    query = db.session.query(User.id, User.full_name, Prescription.id, Prescription.user_id,
-                             func.sum(PrescriptionDetail.quantity * Medicine.price), Prescription.date) \
-        .join(Prescription, Prescription.id.__eq__(PrescriptionDetail.prescription_id)) \
-        .join(Medicine, Medicine.id.__eq__(PrescriptionDetail.medicine_id)) \
-        .join(User, User.id.__eq__(Prescription.user_id))
+    query = db.session.query(
+        User.id.label("user_id"),
+        User.full_name.label("user_name"),
+        Prescription.id.label("prescription_id"),
+        Prescription.user_id.label("prescription_user_id"),
+        func.sum(PrescriptionDetail.quantity * Medicine.price).label("total_price"),
+        Prescription.date.label("date")
+    ).join(
+        Prescription, Prescription.id.__eq__(PrescriptionDetail.prescription_id)
+    ).join(
+        Medicine, Medicine.id.__eq__(PrescriptionDetail.medicine_id)
+    ).join(
+        User, User.id.__eq__(Prescription.user_id)
+    )
 
     query = query.filter(User.id.__eq__(user_id))
     today = datetime.now()
-    todayString = str(today)[0:10]
-    query = query.filter(Prescription.date.__eq__(todayString))
+    today_string = today.strftime("%Y-%m-%d")
+    query = query.filter(Prescription.date.__eq__(today_string))
 
-    return query.group_by(User.id, Prescription.id, Prescription.date).first()
+    result = query.group_by(User.id, Prescription.id, Prescription.date).first()
+
+    if result:
+        return {
+            "user_id": result.user_id,
+            "user_name": result.user_name,
+            "prescription_id": result.prescription_id,
+            "prescription_user_id": result.prescription_user_id,
+            "total_price": float(result.total_price) if result.total_price else 0.0,
+            "date": result.date
+        }
+    else:
+        return None
 
 
 def save_bill_for_user(date, total_amount, user_id):
@@ -302,13 +329,27 @@ def load_hoa_don():
 
 
 def get_prescription_details(prescription_id):
-    d = datetime.now()
-    s = str(d)[5:10]
+    result = db.session.query(
+        Prescription.id.label("prescription_id"),
+        Prescription.name.label("name"),
+        Prescription.date.label("date"),
+        Prescription.symptoms.label("symptoms"),
+        Prescription.diagnosis.label("diagnosis"),
+        Prescription.user_id.label("user_id")
+    ).filter(
+        Prescription.id == prescription_id
+    ).first()
 
-    query = db.session.query(Prescription.id, Prescription.name, Prescription.date, Prescription.symptoms,
-                             Prescription.diagnosis, Prescription.user_id)
-    query = query.filter(Prescription.id.__eq__(prescription_id))
-    return query.all()
+    if result:
+        return {
+            "prescription_id": result.prescription_id,
+            "name": result.name,
+            "date": result.date.strftime("%Y-%m-%d") if result.date else None,
+            "symptoms": result.symptoms,
+            "diagnosis": result.diagnosis,
+            "user_id": result.user_id
+        }
+    return None
 
 
 def load_danh_sach_kham():
@@ -439,27 +480,62 @@ def create_prescription(user_id):
 
 
 
+# def get_prescriptions_for_today(user_id=None):
+#     query = db.session.query(Prescription.id, Prescription.name, Prescription.date, Prescription.symptoms,
+#                              Prescription.diagnosis, Prescription.user_id, User.full_name).join(User, User.id.__eq__(
+#         Prescription.user_id))
+#     today = datetime.now()
+#     todayString = str(today)[0:10]
+#     query = query.filter(Prescription.date.__eq__(todayString))
+#
+#     if user_id:
+#         query = query.filter(Prescription.user_id.__eq__(user_id))
+#
+#     return query.all() or []
+
 def get_prescriptions_for_today(user_id=None):
-    query = db.session.query(Prescription.id, Prescription.name, Prescription.date, Prescription.symptoms,
-                             Prescription.diagnosis, Prescription.user_id, User.full_name).join(User, User.id.__eq__(
-        Prescription.user_id))
-    today = datetime.now()
-    todayString = str(today)[0:10]
-    query = query.filter(Prescription.date.__eq__(todayString))
+    try:
+        query = db.session.query(
+            Prescription.id.label('id'),
+            Prescription.name.label('name'),
+            Prescription.date.label('date'),
+            Prescription.symptoms.label('symptoms'),
+            Prescription.diagnosis.label('diagnosis'),
+            Prescription.user_id.label('user_id'),
+            User.full_name.label('full_name')
+        ).join(User, User.id == Prescription.user_id)
 
-    if user_id:
-        query = query.filter(Prescription.user_id.__eq__(user_id))
+        today = datetime.now()
+        today_string = today.strftime("%Y-%m-%d")
 
-    return query.all()
+        query = query.filter(Prescription.date == today_string)
+        if user_id:
+            query = query.filter(Prescription.user_id == user_id)
+        results = query.all() or []
+        formatted_results = [
+            {
+                "id": row.id,
+                "name": row.name,
+                "date": row.date,
+                "symptoms": row.symptoms,
+                "diagnosis": row.diagnosis,
+                "user_id": row.user_id,
+                "full_name": row.full_name,
+            }
+            for row in results
+        ]
 
-
+        return formatted_results
+    except Exception as e:
+        print(f"Error fetching prescriptions for today: {e}")
+        return []
 # ====================================================================================
-def load_medicines():
-    return Medicine.query.all()
-
-
-def load_medicines_by_name(ten_thuoc=None):
-    query = db.session.query(Medicine.id, Medicine.name, Medicine.price, Medicine.unit, Medicine.description,
+def get_medicines(ten_thuoc=None):
+    query = db.session.query(Medicine.id,
+                             Medicine.name,
+                             Medicine.price,
+                             Medicine.unit,
+                             Medicine.description,
                              Medicine.category_id)
     if ten_thuoc:
         query = query.filter(Medicine.name.__eq__(ten_thuoc))
@@ -493,9 +569,13 @@ def load_phieu_kham_id_today_by_phieu_kham_id(phieu_kham_id=None):
 
 
 def load_thuoc_in_chi_tiet_phieu_kham_today(user_id=None):
+    if user_id == 0:
+        return []
     query = db.session.query(Medicine.id, Medicine.name, Medicine.unit, PrescriptionDetail.quantity,
                              Medicine.description,
-                             PrescriptionDetail.prescription_id) \
+                             PrescriptionDetail.prescription_id,
+                             Prescription.user_id
+                             ) \
         .join(Medicine, Medicine.id.__eq__(PrescriptionDetail.medicine_id)) \
         .join(Prescription, Prescription.id.__eq__(PrescriptionDetail.prescription_id))
 
@@ -506,7 +586,7 @@ def load_thuoc_in_chi_tiet_phieu_kham_today(user_id=None):
     if user_id:
         query = query.filter(Prescription.user_id.__eq__(user_id))
 
-    return query.all()
+    return query.all() or []
 
 
 # ====================================================================================
@@ -553,20 +633,40 @@ def load_lich_su_benh_id_by_phieu_kham_id(phieu_kham_id=None):
 
 
 # ====================================================================================
-def load_lich_su_benh_in_view(user_id=None):
-    query = db.session.query(
-        MedicalHistory.id.label('history_id'),
-        MedicalHistory.user_id.label('user_id'),
-        User.full_name.label('full_name'),
-        Prescription.date.label('date'),
-        Prescription.diagnosis.label('diagnosis'),
-        Prescription.id.label('prescription_id')
+def get_user_prescriptions(user_id=None):
+    try:
+        query = db.session.query(
+            User.id.label('user_id'),
+            User.full_name.label('full_name'),
+            Prescription.date.label('prescription_date'),
+            Prescription.symptoms.label('symptoms'),
+            Prescription.diagnosis.label('diagnosis'),
+            Prescription.id.label('prescription_id')
         ) \
-        .join(User, User.id.__eq__(MedicalHistory.user_id)) \
-        .join(Prescription, Prescription.user_id.__eq__(User.id))
-    if user_id:
-        query = query.filter(User.id.__eq__(user_id))
-    return query.all() or []
+            .join(Prescription, Prescription.user_id == User.id)
+
+        if user_id:
+            query = query.filter(User.id == user_id)
+
+        query = query.distinct(Prescription.id).order_by(Prescription.date.desc(), Prescription.id)
+        results = query.all()
+        formatted_results = [
+            {
+                "prescription_id": row.prescription_id,
+                "date": row.prescription_date,
+                "symptoms": row.symptoms,
+                "diagnosis": row.diagnosis,
+                "user_id": row.user_id,
+                "full_name": row.full_name,
+            }
+            for row in results
+        ]
+
+        return formatted_results or []
+
+    except Exception as ex:
+        print(f"Error fetching prescription data: {ex}")
+        return None
 
 
 # ====================================================================================

@@ -2,6 +2,7 @@ from flask import render_template, request
 import dao, utils
 from app import app, controllers
 from app import admin
+from flask_login import current_user
 
 @app.route("/")
 def index():
@@ -9,11 +10,10 @@ def index():
 
 @app.route("/doctor")
 def doctor():
-    kw = request.args.get('kw')
-    info = dao.load_users_by_user_id(kw)
-    patients = dao.load_users()
+    # kw = request.args.get('kw')
+    info = dao.load_users_by_user_id(current_user.id)
 
-    return render_template("doctor.html", patients=patients, search_result=info)
+    return render_template("doctor.html", search_result = info)
 
 
 @app.route("/introduce")
@@ -33,7 +33,7 @@ def nurse():
 
 @app.context_processor
 def load_medicines():
-    medicines = dao.load_medicines()
+    medicines = dao.get_medicines()
     return {
         'medicines': medicines
     }

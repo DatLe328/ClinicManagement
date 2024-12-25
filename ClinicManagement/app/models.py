@@ -149,7 +149,7 @@ if __name__ == '__main__':
         u4 = User(full_name="Lưu Quang Tạ", username="doctor", password=password, gender=True, phone_number="0126",
                   address="Ho Chi Minh City",
                   avatar="http://example.com/avatar4.jpg", user_role=UserRole.DOCTOR)
-        u5 = User(full_name="Nguyễn Phan Cẩm Ly", username="user", password=password, gender=True, phone_number="0127",
+        u5 = User(full_name="Bùi Thùy Dương", username="user", password=password, gender=True, phone_number="0127",
                   address="Ho Chi Minh City",
                   avatar="http://example.com/avatar5.jpg", user_role=UserRole.USER)
         u6 = User(full_name="Tăng Duy Tân", username="user1", password=password, gender=True, phone_number="0128",
@@ -205,13 +205,19 @@ if __name__ == '__main__':
         mh3 = MedicalHistory(name="Medical History 3", user_id=5)
 
         # Seed Medical History Details
+        # mhd1_mh1 = MedicalHistoryDetail(medical_history_id=1, disease_id=1, date=date(2024, 1, 1))
+        # mhd2_mh1 = MedicalHistoryDetail(medical_history_id=1, disease_id=2, date=date(2024, 1, 1))
+        # mhd3_mh1 = MedicalHistoryDetail(medical_history_id=2, disease_id=3, date=date(2024, 1, 1))
+        # mhd1_mh2 = MedicalHistoryDetail(medical_history_id=2, disease_id=4, date=date(2024, 1, 1))
+        # mhd2_mh2 = MedicalHistoryDetail(medical_history_id=2, disease_id=5, date=date(2024, 1, 1))
+        # mhd1_mh3 = MedicalHistoryDetail(medical_history_id=3, disease_id=5, date=date(2024, 1, 2))
+
         mhd1_mh1 = MedicalHistoryDetail(medical_history_id=1, disease_id=1)
         mhd2_mh1 = MedicalHistoryDetail(medical_history_id=1, disease_id=2)
         mhd3_mh1 = MedicalHistoryDetail(medical_history_id=2, disease_id=3)
         mhd1_mh2 = MedicalHistoryDetail(medical_history_id=2, disease_id=4)
         mhd2_mh2 = MedicalHistoryDetail(medical_history_id=2, disease_id=5)
         mhd1_mh3 = MedicalHistoryDetail(medical_history_id=3, disease_id=5)
-
         # Seed Invoices
         i1 = Invoice(name="Invoice 1", total_amount=1000000, user_id=3, date=date(2024, 1, 1))
         i2 = Invoice(name="Invoice 2", total_amount=2000000, user_id=4, date=date(2024, 1, 1))
@@ -222,13 +228,13 @@ if __name__ == '__main__':
         db.session.add_all([mc1, mc2, mc3])
         db.session.add_all([m1, m2, m3, m4, m5, m6])
         db.session.add_all([d1, d2, d3, d4, d5])
-        db.session.add_all([p1, p2, p3])
-        db.session.add_all([pd1_p1, pd2_p1, pd3_p1, pd1_p2, pd2_p2, pd1_p3, pd2_p3])
-        db.session.add_all([al1, al2])
-        db.session.add_all([ald1_al1, ald2_al1, ald1_al2])
-        db.session.add_all([mh1, mh2, mh3])
-        db.session.add_all([mhd1_mh1, mhd2_mh1, mhd3_mh1, mhd1_mh2, mhd2_mh2, mhd1_mh3])
-        db.session.add_all([i1, i2, i3])
+        # db.session.add_all([p1, p2, p3])
+        # db.session.add_all([pd1_p1, pd2_p1, pd3_p1, pd1_p2, pd2_p2, pd1_p3, pd2_p3])
+        # db.session.add_all([al1, al2])
+        # db.session.add_all([ald1_al1, ald2_al1, ald1_al2])
+        # db.session.add_all([mh1, mh2, mh3])
+        # db.session.add_all([mhd1_mh1, mhd2_mh1, mhd3_mh1, mhd1_mh2, mhd2_mh2, mhd1_mh3])
+        # db.session.add_all([i1, i2, i3])
 
         # pp = Prescription(name="Prescription 1", symptoms="Stomachache", diagnosis="Stomach Ulcer", user_id=1,
         #                   date=date(2024, 12, 19))

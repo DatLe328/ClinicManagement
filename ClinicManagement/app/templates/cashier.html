@@ -8,18 +8,46 @@
 <h1 class=cashier>THANH TOÁN HÓA ĐƠN</h1>
 <hr>
 
-<!--action là đường dẫn của cái hàm thực thi-->
-<form class="thanh_toan" method="post" enctype="multipart/form-data" action="/cashier">
-    <div class="thanh_toan_1">
-        <input type="text" class="form-control" required id="submit_phieuKham_id"
-               placeholder="Nhập mã phiếu khám của bệnh nhân..."
-               name="submit_phieuKham_id">
-    </div>
-    <div class="mt-1 mb-1">
-        <button type="submit" class="btn btn-primary">Thanh toán</button>
-    </div>
-
+{#<form class="thanh_toan" method="post" enctype="multipart/form-data" action="/cashier">#}
+{#    <div class="thanh_toan_1">#}
+{#        <input type="text" class="form-control" required id="submit_phieuKham_id"#}
+{#               placeholder="Nhập mã phiếu khám của bệnh nhân..."#}
+{#               name="submit_phieuKham_id">#}
+{#    </div>#}
+{#    <div class="mt-1 mb-1">#}
+{#        <button type="submit" class="btn btn-primary">Thanh toán</button>#}
+{#    </div>#}
+    <form method="get" action="/cashier" class="d-flex">
+    <input class="form-control me-2" type="text" name="kw" placeholder="Mã bệnh nhân"/>
+    <button class="btn btn-primary" type="submit">Tìm</button>
 </form>
+
+    {% if invoices %}
+<table class="table">
+    <thead>
+        <tr>
+            <th>Mã hóa đơn</th>
+            <th>Ngày</th>
+            <th>Tổng số tiền</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for invoice in invoices %}
+        <tr>
+            <td>{{ invoice.id }}</td>
+            <td>{{ invoice.date }}</td>
+            <td>{{ "{:,.0f}".format(invoice.total_amount) }} VNĐ</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Không tìm thấy hóa đơn nào.</p>
+{% endif %}
+
+
+
+
 {% if err_msg %}
 <div class="alert alert-danger">
     {{ err_msg }}

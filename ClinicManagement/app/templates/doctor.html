@@ -16,8 +16,8 @@
                             <div>
                                 <h4 style="font-weight:bold">Tra cứu bệnh nhân</h4>
                                 <p>
-                                    Nếu nhập sai thì vui lòng bảo bệnh nhân đừng thanh toán và ra đăng ký khám lại vào
-                                    hôm sau
+                                    Nhập mã bệnh nhân và nhấn kiểm tra để kiểm tra xem thông tin 
+                                    bệnh nhân chính xác.
                                 </p>
                             </div>
 
@@ -107,8 +107,7 @@
                         <div>
                             <h2 style="font-weight: bold">PHIẾU KHÁM BỆNH</h2>
                             <p>
-                                Nếu nhập sai thì vui lòng bảo bệnh nhân đừng thanh toán và ra đăng ký khám lại vào hôm
-                                sau
+                                Vui lòng kiểm tra kỹ trước khi thêm và lưu phiếu.
                             </p>
                             <hr>
                             <div class="container-fluid">
@@ -125,7 +124,7 @@
                                                 <label for="symptom" class="form-label">Triệu chứng:</label>
                                                 <input type="text" class="form-control" id="trieu_chung"
                                                        placeholder="Nhập triệu chứng"
-                                                       name="trieu_chung">
+                                                       name="trieu_chung" value="{{ symptoms }}">
                                             </div>
                                         </div>
                                     </div>
@@ -134,6 +133,11 @@
                                             <div class="m-diagnostic">
                                                 <label class="form-label">Chuẩn đoán:</label>
                                                 <select class="form-select" name="chuan_doan" id="diseases">
+                                                    {% if diagnosis %}
+                                                        <option value="" selected disabled>Hiện tại: {{ diagnosis }}</option>
+                                                    {% else %}
+                                                        <option value="" selected disabled>Vui lòng chọn chuẩn đoán</option>
+                                                    {% endif %}
                                                     {% for d in diseases %}
                                                         <option>{{ d.name }}</option>
                                                     {% endfor %}
@@ -159,7 +163,7 @@
                                 {% for t in thuoc_trong_ctpk %}
                                     <tr>
                                         <td>{{ t.prescription_id }}</td>
-                                        <td>{{ t.prescription_id }}</td>
+                                        <td>{{ t.user_id }}</td>
                                         <td>{{ t.name }}</td>
                                         <td>{{ t.unit }}</td>
                                         <td>{{ t.quantity }}</td>
