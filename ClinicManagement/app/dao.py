@@ -56,6 +56,22 @@ def update_medicine_quantity_in_prescription(medicine_id, prescription_id, new_q
         print(f"Error updating medicine quantity: {e}")
 
 # ================================================================ #
+def update_user_details(user_id, full_name, phone, address):
+    try:
+        user = User.query.get(user_id)
+        if user:
+            user.full_name = full_name
+            user.phone_number = phone
+            user.address = address
+            db.session.commit()  # Save changes
+            return True
+        return False
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error updating user details: {e}")
+        return False
+
+
 def load_prescription_details_today(ma_phieu_kham_today):
     query = db.session.query(PrescriptionDetail.medicine_id, Medicine.name, Medicine.unit,
                              PrescriptionDetail.quantity) \

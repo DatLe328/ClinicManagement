@@ -24,6 +24,27 @@ def login_process():
 
     return render_template('login.html')
 
+@app.route('/update-profile', methods=['POST'])
+def update_profile():
+    if not current_user.is_authenticated:
+        return redirect(url_for('login_process'))
+
+    full_name = request.form.get('name')
+    phone = request.form.get('phone')
+    address = request.form.get('address')
+
+    try:
+        user_updated = dao.update_user_details(current_user.id, full_name, phone, address)
+
+        if user_updated:
+            flash('Đã lưu thông tin thông tin thành công!', 'success')
+        else:
+            flash('Không thể lưu thông tin!', 'danger')
+    except Exception as e:
+        flash(f'An error occurred: {str(e)}', 'danger')
+
+    return redirect(url_for('profile_process'))
+
 
 @app.route("/login-admin", methods=['post'])
 def login_admin_process():
@@ -154,6 +175,8 @@ def user_dang_ky_kham():
         with open("app/data/rules.json", "r") as file:
             rules = json.load(file)
         phone_number_input = request.form['user_dang_ky_kham']
+        date_time = request.form['appointment_date']
+        print(date_time)
         max_patient_limit = int(rules.get("so_benh_nhan", 0))
 
         patient = dao.get_users_by_phone(phone_number=phone_number_input)
@@ -426,20 +449,22 @@ def cashier():
         tien_kham = rules["tien_kham"]
         today_prescriptions = dao.get_prescriptions_for_today(user_id=user_id)
         print(today_prescriptions)
-        if today_prescriptions:
-            phieu_kham = dao.get_prescription_details(today_prescriptions[0]['id'])
-            bill_cua_user = dao.bill_for_one_user_by_id(user_id=user_id)
-            tien_kham = float(tien_kham)
-            if bill_cua_user and tien_kham >= 0:
-                tien_thuoc = bill_cua_user['total_price'] + tien_kham
-                dao.save_bill_for_user(date=phieu_kham['date'], total_amount=tien_thuoc, user_id=user_id)
-                err_msg = "Thanh toán thành công"
-                return render_template("cashier.html", err_msg=err_msg, tien_kham=tien_kham)
-            else:
-                err_msg = "Chưa có hóa đơn"
-                return render_template("cashier.html", err_msg=err_msg, tien_kham=tien_kham)
-        else:
-            err_msg = "Không tồn tại phiếu khám này trong ngày hôm nay"
+        invoices = dao.get_invoice_details_by_user_id(user_id)
+        return render_template("cashier.html", err_msg=err_msg, invoices=invoices)
+        # if today_prescriptions:
+        #     phieu_kham = dao.get_prescription_details(today_prescriptions[0]['id'])
+        #     bill_cua_user = dao.bill_for_one_user_by_id(user_id=user_id)
+        #     tien_kham = float(tien_kham)
+        #     if bill_cua_user and tien_kham >= 0:
+        #         tien_thuoc = bill_cua_user['total_price'] + tien_kham
+        #         dao.save_bill_for_user(date=phieu_kham['date'], total_amount=tien_thuoc, user_id=user_id)
+        #         err_msg = "Thanh toán thành công"
+        #         return render_template("cashier.html", err_msg=err_msg, tien_kham=tien_kham)
+        #     else:
+        #         err_msg = "Chưa có hóa đơn"
+        #         return render_template("cashier.html", err_msg=err_msg, tien_kham=tien_kham)
+        # else:
+        #     err_msg = "Không tồn tại phiếu khám này trong ngày hôm nay"
         return render_template("cashier.html", err_msg=err_msg)
     return render_template("cashier.html", err_msg=err_msg)
 
