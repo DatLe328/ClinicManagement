@@ -8,93 +8,58 @@
 <h1 class=cashier>THANH TOÁN HÓA ĐƠN</h1>
 <hr>
 
-{#<form class="thanh_toan" method="post" enctype="multipart/form-data" action="/cashier">#}
-{#    <div class="thanh_toan_1">#}
-{#        <input type="text" class="form-control" required id="submit_phieuKham_id"#}
-{#               placeholder="Nhập mã phiếu khám của bệnh nhân..."#}
-{#               name="submit_phieuKham_id">#}
-{#    </div>#}
-{#    <div class="mt-1 mb-1">#}
-{#        <button type="submit" class="btn btn-primary">Thanh toán</button>#}
-{#    </div>#}
-    <form method="get" action="/cashier" class="d-flex">
-    <input class="form-control me-2" type="text" name="kw" placeholder="Mã bệnh nhân"/>
+<form method="get" action="/cashier" class="d-flex">
+    <input class="form-control me-2" type="text" name="kw" placeholder="Mã bệnh nhân" />
     <button class="btn btn-primary" type="submit">Tìm</button>
 </form>
 
-    {% if invoices %}
-<table class="table">
-    <thead>
-        <tr>
-            <th>Mã hóa đơn</th>
-            <th>Ngày</th>
-            <th>Tổng số tiền</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for invoice in invoices %}
-        <tr>
-            <td>{{ invoice.id }}</td>
-            <td>{{ invoice.date }}</td>
-            <td>{{ "{:,.0f}".format(invoice.total_amount) }} VNĐ</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% else %}
-<p>Không tìm thấy hóa đơn nào.</p>
+{% if user_info %}
+<div class="card mt-3">
+    <div class="card-body">
+        <h5>Thông tin bệnh nhân</h5>
+        <p><strong>Mã bệnh nhân:</strong> {{ user_info.user_id }}</p>
+        <p><strong>Họ tên:</strong> {{ user_info.full_name }}</p>
+        <p><strong>Số điện thoại:</strong> {{ user_info.phone_number }}</p>
+        <p><strong>Địa chỉ:</strong> {{ user_info.address }}</p>
+        <form method="post" action="/process_payment">
+            <input type="hidden" name="user_id" value="{{ user_info.user_id }}">
+            <button type="submit" class="btn btn-success">Thanh toán</button>
+        </form>
+    </div>
+</div>
 {% endif %}
 
-
-
+{% if invoices %}
+<div class="card mt-3">
+    <div class="card-body">
+        <h5>Hóa đơn</h5>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Mã hóa đơn</th>
+                    <th>Ngày</th>
+                    <th>Tổng tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for invoice in invoices %}
+                <tr>
+                    <td>{{ invoice[0] }}</td>
+                    <td>{{ invoice[1] }}</td>
+                    <td>{{ "{:,.0f}".format(invoice[2]) }} VNĐ</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
 
 {% if err_msg %}
-<div class="alert alert-danger">
+<div class="alert alert-danger mt-3">
     {{ err_msg }}
 </div>
 {% endif %}
 
-<div class="r-content">
-    <div class="r-sub-content mb-0">
-
-        <div class="row r-title" style="font-weight: bold">
-            <p>HÓA ĐƠN</p>
-        </div>
-        <hr>
-        {% if hoa_don %}
-        {% if tien_kham %}
-        <div class="r-sub-content-1">
-            <div class="row">
-                <div class="col-md-6 mt-2 mb-2">
-                    Họ tên: {{ hoa_don[0][0] }}
-                </div>
-                <div class="col-md-6 mt-2 mb-2">
-                    Ngày khám: {{ hoa_don[0][1] }}
-                </div>
-            </div>
-
-            <div class="row">
-
-                <div class="col-md-6 mt-2 mb-2">
-                    Tiền khám: {{tien_kham}} VNĐ
-                </div>
-                <div class="col-md-6 mt-2 mb-2">
-                    Tiền thuốc: {{ "{:,.0f}".format(hoa_don[0][2] - tien_kham) }} VNĐ
-                </div>
-
-            </div>
-
-            <hr>
-            <div class="row text-center">
-                <div class="col-md-12 mt-2 mb-2" style="font-weight: bold">
-                    Tổng tiền: {{ "{:,.0f}".format(hoa_don[0][2]) }} VNĐ
-                </div>
-            </div>
-
-        </div>
-        {% endif %}
-        {% endif %}
-    </div>
-</div>
 
 {% endblock %}

@@ -9,33 +9,60 @@ from sqlalchemy import func
 from sqlalchemy.sql.functions import user
 
 # ========================== TEST ZONE ========================== #
+def get_appointment_list_id_by_date(date):
+    try:
+        result = db.session.query(AppointmentList.id).filter(
+            func.date(AppointmentList.date) == date
+        ).first()
+        return result[0] if result else None
+    except Exception as e:
+        raise Exception(f"Error retrieving appointment list ID by date: {e}")
+def delete_appointment_list_if_empty(appointment_list_id):
+    try:
+        patient_count = db.session.query(func.count(AppointmentDetail.id)).filter(
+            AppointmentDetail.appointment_list_id == appointment_list_id
+        ).scalar()
+
+        if patient_count == 0:
+            db.session.query(AppointmentList).filter(AppointmentList.id == appointment_list_id).delete()
+            db.session.commit()
+            return True
+        return False
+    except Exception as e:
+        db.session.rollback()
+        raise Exception(f"Error checking or deleting appointment list: {e}")
+def has_prescription(user_id, date):
+    try:
+        prescription = db.session.query(Prescription).filter(
+            Prescription.user_id == user_id,
+            func.date(Prescription.date) == date
+        ).first()
+        return prescription is not None
+    except Exception as e:
+        raise Exception(f"Error checking prescription: {e}")
 def get_date_by_appointment_list_id(appointment_list_id):
     try:
         result = db.session.query(AppointmentList.date).filter(AppointmentList.id == appointment_list_id).first()
         if result:
-            return result[0]  # Trả về ngày khám
-        return None  # Không tìm thấy kết quả
+            return result[0]
+        return None
     except Exception as e:
         raise Exception(f"Error retrieving date for appointment list ID {appointment_list_id}: {e}")
 def delete_appointment_detail_by_user_and_date(user_id, date):
     try:
-        # Lấy danh sách khám ứng với ngày
         appointment_list = db.session.query(AppointmentList.id).filter(AppointmentList.date == date).first()
 
         if appointment_list:
             appointment_list_id = appointment_list[0]
-
-            # Xóa chi tiết trong bảng AppointmentDetail
             db.session.query(AppointmentDetail).filter(
                 AppointmentDetail.appointment_list_id == appointment_list_id,
                 AppointmentDetail.user_id == user_id
             ).delete()
 
-            # Commit thay đổi
             db.session.commit()
             return True
         else:
-            return False  # Không tìm thấy danh sách khám ứng với ngày
+            return False
     except Exception as e:
         db.session.rollback()
         raise Exception(f"Error deleting appointment detail: {e}")
@@ -50,7 +77,7 @@ def count_patients_by_date(date):
         .join(AppointmentList, AppointmentList.id == AppointmentDetail.appointment_list_id) \
         .filter(AppointmentList.date == date)
     return query.scalar()
-def get_appointment_by_date(date):
+def create_list(date):
     query = db.session.query(AppointmentList.id, AppointmentList.name, AppointmentList.date) \
         .filter(AppointmentList.date == date)
     return query.all()
@@ -424,7 +451,7 @@ def get_prescription_details(prescription_id):
 
 
 def load_danh_sach_kham():
-    return db.session.query(AppointmentList.id, AppointmentList.name, AppointmentList.date).all()
+    return db.session.query(AppointmentList.id, AppointmentList.name, AppointmentList.date).order_by(AppointmentList.date).all()
 
 
 def create_appointment_list(date):
@@ -433,42 +460,13 @@ def create_appointment_list(date):
     db.session.commit()
 
 
-def get_appointments_for_today():
-    query = db.session.query(AppointmentList.id, AppointmentList.name, AppointmentList.date)
-    today = datetime.now()
-    todayString = str(today)[0:10]
-    query = query.filter(AppointmentList.date.__eq__(todayString))
-    return query.all()
-
-
 def create_appointment_detail(appointment_id, user_id, appointment_time=None):
     ctdsk = AppointmentDetail(appointment_list_id=appointment_id, user_id=user_id, time=appointment_time)
     db.session.add(ctdsk)
     db.session.commit()
 
 
-def load_chi_tiet_danh_sach_kham_today(user_id=None):
-    query = db.session.query(AppointmentDetail.id, AppointmentDetail.appointment_list_id, AppointmentDetail.user_id) \
-        .join(AppointmentList, AppointmentList.id.__eq__(AppointmentDetail.appointment_list_id))
-    test = db.session.query(AppointmentList.id, AppointmentList.name, AppointmentList.date)
-    today = datetime.now()
-    todayString = str(today)[0:10]
-    query = query.filter(AppointmentList.date.__eq__(todayString))
-
-    if user_id:
-        query = query.filter(AppointmentDetail.user_id.__eq__(user_id))
-
-    return query.all()
-
-
 # ====================================================================================
-def get_user_in_danh_sach_kham():
-    query = db.session.query(AppointmentDetail.id, AppointmentDetail.appointment_list_id, User.id, User.full_name,
-                             User.gender, User.birth_date, User.address, User.phone_number) \
-        .join(User, User.id.__eq__(AppointmentDetail.user_id))
-
-    return query.all()
-
 
 def get_appointment(appointment_id=None):
     query = db.session.query(AppointmentList.id, AppointmentList.name, AppointmentList.date)
@@ -677,8 +675,8 @@ def load_lich_su_benh(user_id=None):
     return query.all()
 
 
-def save_chi_tiet_lich_su_benh(lich_su_benh_id=None, benh_id=None):
-    lsb = MedicalHistoryDetail(medical_history_id=lich_su_benh_id, disease_id=benh_id)
+def add_medical_history_detail(medical_history_id=None, disease_id=None):
+    lsb = MedicalHistoryDetail(medical_history_id=medical_history_id, disease_id=disease_id)
     db.session.add(lsb)
     db.session.commit()
 
@@ -738,17 +736,3 @@ def get_user_prescriptions(user_id=None):
     except Exception as ex:
         print(f"Error fetching prescription data: {ex}")
         return None
-
-
-# ====================================================================================
-def get_appointment_counts_for_today():
-    query = db.session.query(AppointmentList.id, func.count(AppointmentDetail.id)) \
-        .join(AppointmentDetail, AppointmentDetail.appointment_list_id.__eq__(AppointmentList.id))
-    today = datetime.now()
-    todayString = str(today)[0:10]
-    query = query.filter(AppointmentList.date.__eq__(todayString))
-
-    return query.group_by(AppointmentList.id).all()
-# ====================================================================================
-
-
