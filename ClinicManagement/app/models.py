@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Boolean, Text, ForeignKey, Enum, Date
+from sqlalchemy import Column, Integer, String, Float, Boolean, Text, ForeignKey, Enum, Date, Time
 from sqlalchemy.orm import relationship
 from app import db, app
 from enum import Enum as RoleEnum
@@ -47,6 +47,7 @@ class User(BaseModel, UserMixin):
     birth_date = Column(Date, default=datetime.now())
     gender = Column(Boolean, nullable=True)
     phone_number = Column(String(50), nullable=True)
+    email = Column(String(100), nullable=True)
     address = Column(String(100), nullable=True)
     avatar = Column(String(100), nullable=False)
     status = Column(Boolean, default=True)
@@ -97,6 +98,7 @@ class AppointmentList(BaseModel):
 
 
 class AppointmentDetail(BaseModel):
+    time = Column(Time, nullable=True)
     appointment_list_id = Column(Integer, ForeignKey(AppointmentList.id), nullable=False)
     user_id = Column(Integer, ForeignKey(User.id), nullable=False)
 
@@ -138,7 +140,7 @@ if __name__ == '__main__':
 
        # Seed Users
         u1 = User(full_name="Lê Văn Đạt", username="admin", password=password_admin, gender=True,
-                  phone_number="0123", address="Ho Chi Minh City",
+                  phone_number="0123", address="Ho Chi Minh City", email='hoquochuy99.2019@gmail.com',
                   avatar="http://it.ou.edu.vn/asset/ckfinder/userfiles/5/images/giang_vien/Vinh_2.jpg", user_role=UserRole.ADMIN)
         u2 = User(full_name="Hồ Quốc Huy", username="cashier", password=password, gender=False,
                   phone_number="0124", address="Ho Chi Minh City",

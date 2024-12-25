@@ -5,11 +5,27 @@ import dao, utils, json
 from flask_login import login_user, logout_user, login_required, current_user
 from app import login, app, db
 from app.models import UserRole
-
+import cloudinary
+import cloudinary.uploader
 
 # =============== TEST CONTROLLERS =============== #
 
-
+@app.route('/delete_patient', methods=['POST'])
+def delete_patient_process():
+    err_msg = ''
+    suc_msg = ''
+    user_id = request.form.get('user_id_delete')
+    date = request.form.get('date_delete')
+    print(user_id)
+    print(date)
+    try:
+        if dao.delete_appointment_detail_by_user_and_date(user_id=user_id, date=date):
+            suc_msg = "Đã xóa chi tiết phiếu khám thành công."
+        else:
+            err_msg = "Không tìm thấy danh sách khám trong ngày này."
+    except Exception as e:
+        err_msg = f"Đã xảy ra lỗi: {e}"
+    return render_template("nurse.html", err_msg=err_msg, current_date=date)
 
 # =============== USER CONTROLLERS =============== #
 @app.route("/login", methods=['get', 'post'])
@@ -101,10 +117,8 @@ def register_process():
 
             avatar_path = None
             if avatar:
-                avatar_path = f"static/uploads/{avatar.filename}"
-                avatar.save(avatar_path)
-            else:
-                avatar_path = "static/default-avatar.png"
+                res = cloudinary.uploader.upload(avatar)
+                avatar_path = res['secure_url']
 
             try:
                 dao.add_user(
@@ -178,6 +192,7 @@ def user_dang_ky_kham():
     if request.method == 'POST':
         with open("app/data/rules.json", "r") as file:
             rules = json.load(file)
+
         phone_number_input = request.form['user_dang_ky_kham']
         appointment_date = request.form['appointment_date']
         appointment_time = request.form['appointment_time']
@@ -189,11 +204,11 @@ def user_dang_ky_kham():
             err_msg = "Không tồn tại user trong cơ sở dữ liệu"
             return render_template("index.html", err_msg=err_msg)
 
-        if current_user.user_role == UserRole.USER and current_user.id != patient[0][0]:
+        if current_user.user_role == UserRole.USER and current_user.id != patient['id']:
             err_msg = "Bạn không có SDT này hoặc bạn chưa thêm SDT này"
             return render_template("index.html", err_msg=err_msg)
 
-        user_id = patient[0][0]
+        user_id = patient['id']
 
         appointment_schedule = dao.get_appointment_by_date(appointment_date)
         if not appointment_schedule:
@@ -205,21 +220,18 @@ def user_dang_ky_kham():
         if dao.check_user_appointment_on_date(date=appointment_date, user_id=user_id):
             err_msg = "Bạn đã đăng ký rồi"
             return render_template("index.html", err_msg=err_msg)
-
         registered_patient_count = dao.count_patients_by_date(appointment_date)
-        print(registered_patient_count)
         if registered_patient_count >= max_patient_limit:
             err_msg = "Số lượng bệnh nhân trong danh sách đã đầy, vui lòng đăng ký khám vào hôm sau"
             return render_template("index.html", err_msg=err_msg)
-
-
-        dao.create_appointment_detail(adppointment_id=appointment_id, user_id=user_id)
+        dao.create_appointment_detail(appointment_id=appointment_id, user_id=user_id, appointment_time=appointment_time)
         err_msg = "Đăng ký thành công"
 
         if not dao.load_lich_su_benh(user_id=user_id):
             dao.add_medical_history(user_id=user_id)
 
     return render_template("index.html", err_msg=err_msg)
+
 
 
 # =============== Create appointment =============== #
@@ -240,27 +252,39 @@ def create_danh_sach_kham_for_nurse():
     return render_template("nurse.html", err_msg=err_msg)
 
 
-@app.route("/load_appointment", methods=['get', 'post'])
+@app.route("/load_appointment", methods=['GET', 'POST'])
 def load_appointment_process():
     err_msg = ''
     user_list = []
-
+    current_date = datetime.now().strftime('%Y-%m-%d')
     try:
         appointment_id = request.form.get('button_value')
         if appointment_id:
             appointment_details = dao.get_appointment_details(appointment_id)
             for i in appointment_details:
                 user_list.append(dao.load_users_by_user_id(i.user_id))
-
             if not user_list:
-                err_msg = f"Không tìm thấy bệnh nhân nào thuộc danh sách"
+                err_msg = "Không tìm thấy bệnh nhân nào thuộc danh sách"
+            current_date_from_db = dao.get_date_by_appointment_list_id(appointment_id)
+            if current_date_from_db:
+                current_date = current_date_from_db.strftime('%Y-%m-%d')
         else:
             err_msg = "Appointment ID không hợp lệ hoặc không được gửi đến!"
 
     except Exception as ex:
         err_msg = f"Đã xảy ra lỗi: {str(ex)}"
-    print(user_list)
-    return render_template("nurse.html", err_msg=err_msg, appointment_user_list=user_list)
+
+    print(f"current_date: {current_date}")
+
+    return render_template(
+        "nurse.html",
+        err_msg=err_msg,
+        appointment_user_list=user_list,
+        current_date=current_date
+    )
+
+
+from send import send_email
 
 
 @app.route("/save_chi_tiet_danh_sach_kham", methods=['get', 'post'])
@@ -271,20 +295,25 @@ def save_chi_tiet_danh_sach_kham():
         if appointments_today:
             appointment_details = dao.get_appointment_details(appointment_detail_id=appointments_today[0][0])
             if appointment_details:
-                n = len(appointment_details)
-                for i in range(0, n):
-                    pk_today_for_one_user = dao.get_prescriptions_for_today(user_id=appointment_details[i][2])
-                    if pk_today_for_one_user:
+                for detail in appointment_details:
+                    user_id = detail[2]
+                    email = dao.get_email_by_user_id(user_id=user_id)
+                    pk_today = dao.get_prescriptions_for_today(user_id=user_id)
+
+                    if pk_today:
                         err_msg = "Đã tạo phiếu cho user này rồi"
                     else:
-                        pk = dao.create_prescription(user_id=appointment_details[i][2])
+                        dao.create_prescription(user_id)
                         err_msg = "Tạo thành công phiếu khám"
+                        subject = "Thông báo tạo phiếu khám"
+                        content = f"Xin chào,\n\nPhiếu khám cho user ID {user_id} đã được tạo thành công."
+                        send_email(email, subject, content)
             else:
                 err_msg = "Chưa có bệnh nhân nào đăng ký khám"
-
         save_chi_tiet_dsk = request.form['save_chi_tiet_dsk']
 
     return render_template("nurse.html", err_msg=err_msg)
+
 
 
 # =============== Create prescription =============== #
@@ -372,12 +401,7 @@ def load_thuoc_trong_chi_tiet_pk():
     }
 
 
-@app.context_processor
-def get_danh_sach_kham():
-    danh_sach_kham = dao.load_danh_sach_kham()
-    return {
-        'danh_sach_kham': danh_sach_kham
-    }
+
 
 
 ma_phieu_kham_today = 0
@@ -595,4 +619,11 @@ def load_appointment_time():
     ]
     return {
         'appointment_times': times
+    }
+
+@app.context_processor
+def get_danh_sach_kham():
+    danh_sach_kham = dao.load_danh_sach_kham()
+    return {
+        'danh_sach_kham': danh_sach_kham
     }

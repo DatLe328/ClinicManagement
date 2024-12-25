@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask import render_template, request
 import dao, utils
 from app import app, controllers
@@ -27,8 +29,9 @@ def support():
 
 
 @app.route("/nurse")
-def nurse():
-    return render_template("nurse.html")
+def nurse_process():
+    current_date = datetime.now().strftime('%Y-%m-%d')
+    return render_template("nurse.html", current_date=current_date)
 
 
 @app.context_processor

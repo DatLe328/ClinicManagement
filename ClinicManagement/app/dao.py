@@ -9,6 +9,36 @@ from sqlalchemy import func
 from sqlalchemy.sql.functions import user
 
 # ========================== TEST ZONE ========================== #
+def get_date_by_appointment_list_id(appointment_list_id):
+    try:
+        result = db.session.query(AppointmentList.date).filter(AppointmentList.id == appointment_list_id).first()
+        if result:
+            return result[0]  # Trả về ngày khám
+        return None  # Không tìm thấy kết quả
+    except Exception as e:
+        raise Exception(f"Error retrieving date for appointment list ID {appointment_list_id}: {e}")
+def delete_appointment_detail_by_user_and_date(user_id, date):
+    try:
+        # Lấy danh sách khám ứng với ngày
+        appointment_list = db.session.query(AppointmentList.id).filter(AppointmentList.date == date).first()
+
+        if appointment_list:
+            appointment_list_id = appointment_list[0]
+
+            # Xóa chi tiết trong bảng AppointmentDetail
+            db.session.query(AppointmentDetail).filter(
+                AppointmentDetail.appointment_list_id == appointment_list_id,
+                AppointmentDetail.user_id == user_id
+            ).delete()
+
+            # Commit thay đổi
+            db.session.commit()
+            return True
+        else:
+            return False  # Không tìm thấy danh sách khám ứng với ngày
+    except Exception as e:
+        db.session.rollback()
+        raise Exception(f"Error deleting appointment detail: {e}")
 def check_user_appointment_on_date(user_id, date):
 
     query = db.session.query(AppointmentDetail.id) \
@@ -71,6 +101,12 @@ def update_medicine_quantity_in_prescription(medicine_id, prescription_id, new_q
         print(f"Error updating medicine quantity: {e}")
 
 # ================================================================ #
+def get_email_by_user_id(user_id):
+    user = User.query.filter_by(id=user_id).first()
+    if user:
+        return user.email
+    return None
+
 def update_user_details(user_id, full_name, phone, address):
     try:
         user = User.query.get(user_id)
@@ -213,7 +249,11 @@ def get_users_by_phone(phone_number=None):
     query = db.session.query(User.id, User.full_name, User.phone_number)
     if phone_number:
         query = query.filter(User.phone_number.__eq__(phone_number))
-    return query.all()
+    user = query.first()
+
+    if user:
+        return {"id": user.id, "full_name": user.full_name, "phone_number": user.phone_number}
+    return None
 
 
 def auth_user(username, password, role=None):
@@ -401,8 +441,8 @@ def get_appointments_for_today():
     return query.all()
 
 
-def create_appointment_detail(adppointment_id, user_id):
-    ctdsk = AppointmentDetail(appointment_list_id=adppointment_id, user_id=user_id)
+def create_appointment_detail(appointment_id, user_id, appointment_time=None):
+    ctdsk = AppointmentDetail(appointment_list_id=appointment_id, user_id=user_id, time=appointment_time)
     db.session.add(ctdsk)
     db.session.commit()
 

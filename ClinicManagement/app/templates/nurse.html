@@ -52,7 +52,8 @@
                                             <td>{{ ds.name }}</td>
                                             <td>{{ ds.date }}</td>
                                             <td>
-                                                <form method="post" enctype="multipart/form-data" action="/load_appointment">
+                                                <form method="post" enctype="multipart/form-data"
+                                                      action="/load_appointment">
                                                     <button type="submit" class="btn btn-primary"
                                                             name="button_value" value="{{ ds.id }}">
                                                         <i class="fa fa-eye"></i>
@@ -79,39 +80,49 @@
 
                     </div>
                     <div class="schedule-form">
-                        <form method="post" enctype="multipart/form-data" action="/save_chi_tiet_danh_sach_kham">
-                            <div class="chi-tiet-danh-sach-kham">
-                                <table class="table">
+                        <div class="chi-tiet-danh-sach-kham">
+                            <table class="table">
+                                <tr>
+                                    <th>Mã bệnh nhân</th>
+                                    <th>Họ tên</th>
+                                    <th>Giới tính</th>
+                                    <th>Ngày sinh</th>
+                                    <th>SĐT</th>
+                                    <th>Địa chỉ</th>
+                                    <th>Hành động</th>
+                                </tr>
+                                {% for us in appointment_user_list %}
                                     <tr>
-                                        <th>Mã bệnh nhân</th>
-                                        <th>Họ tên</th>
-                                        <th>Giới tính</th>
-                                        <th>Ngày sinh</th>
-                                        <th>SĐT</th>
-                                        <th>Địa chỉ</th>
+                                        <td>{{ us[0].user_id }}</td>
+                                        <td>{{ us[0].full_name }}</td>
+                                        {% if us[0].gender == True %}
+                                            <td>Nam</td>
+                                        {% else %}
+                                            <td>Nữ</td>
+                                        {% endif %}
+                                        <td>{{ us[0].birth_date }}</td>
+                                        <td>{{ us[0].phone_number }}</td>
+                                        <td>{{ us[0].address }}</td>
+                                        <td>
+                                            <form method="post" action="/delete_patient" class="delete-form">
+                                                <input type="hidden" id="user_id_delete" name="user_id_delete" value="{{ us[0].user_id }}"/>
+                                                <input type="hidden" id="date_delete" name="date_delete" value="{{ current_date }}"/>
+                                                <button type="submit" class="btn btn-danger">
+                                                    {{ current_date }}
+                                                </button>
+                                            </form>
+                                        </td>
                                     </tr>
-                                    {% for us in appointment_user_list %}
-                                        <tr>
-                                            <td>{{ us[0].user_id }}</td>
-                                            <td>{{ us[0].full_name }}</td>
-                                            {% if us[0].gender == True %}
-                                                <td>Nam</td>
-                                            {% else %}
-                                                <td>Nữ</td>
-                                            {% endif %}
-                                            <td>{{ us[0].birth_date }}</td>
-                                            <td>{{ us[0].phone_number }}</td>
-                                            <td>{{ us[0].address }}</td>
-                                        </tr>
-                                    {% endfor %}
-                                </table>
-                            </div>
-                            <div class="bt-confirm form-floating mt-3 mb-3">
+                                {% endfor %}
+                            </table>
+                        </div>
+                        <div class="bt-confirm form-floating mt-3 mb-3">
+                            <form method="post" enctype="multipart/form-data" action="/save_chi_tiet_danh_sach_kham">
                                 <input type="submit" value="Xác nhận" class="btn btn-success" required
                                        id="save_chi_tiet_dsk"
                                        name="save_chi_tiet_dsk"/>
-                            </div>
-                        </form>
+                            </form>
+                        </div>
                     </div>
 
                 </div>
