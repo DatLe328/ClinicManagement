@@ -204,7 +204,7 @@
                         <strong>LƯU Ý:</strong>
                         <p>
                             Lịch khám có hiệu lực sau khi có xác nhận từ chính thức từ Hệ thống
-                            phòng mạch IMPROOK.
+                            phòng mạch.
                         </p>
                         <p>
                             Thời gian đăng ký khám <b>trực tuyến</b> sẽ bắt đầu vào lúc
@@ -213,7 +213,7 @@
                         </p>
                         <p>
                             Những quý khách nào <b>không thể đăng ký khám trực tuyến</b> thì có
-                            thể đến trực tiếp tại phòng mạch <b>I'MPROOK</b> của chúng tôi để
+                            thể đến trực tiếp tại phòng mạch <b></b> của chúng tôi để
                             <b>được hỗ trợ đăng ký khám</b>.
                         </p>
                         <p>
@@ -250,7 +250,21 @@
                                 </div>
                                 <div>
                                     <label for="appointment_date">Ngày hẹn: </label>
-                                    <input type="datetime-local" id="appointment_date" name="appointment_date">
+                                    <select id="appointment_date" name="appointment_date" required>
+                                        <option value="" selected disabled>Ngày hẹn</option>
+                                        {% for date in appointment_dates %}
+                                            <option value="{{ date }}">{{ date }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="appointment_time">Giờ hẹn: </label>
+                                    <select id="appointment_time" name="appointment_time" required>
+                                        <option value="" selected disabled>Giờ hẹn</option>
+                                        {% for time in appointment_times %}
+                                            <option value="{{ time }}">{{ time }}</option>
+                                        {% endfor %}
+                                    </select>
                                 </div>
                                 <div class="form-floating mt-3 mb-3">
                                     <input type="submit" value="Đăng ký khám" class="btn btn-info"/>

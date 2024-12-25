@@ -9,6 +9,21 @@ from sqlalchemy import func
 from sqlalchemy.sql.functions import user
 
 # ========================== TEST ZONE ========================== #
+def check_user_appointment_on_date(user_id, date):
+
+    query = db.session.query(AppointmentDetail.id) \
+        .join(AppointmentList, AppointmentList.id == AppointmentDetail.appointment_list_id) \
+        .filter(AppointmentList.date == date, AppointmentDetail.user_id == user_id)
+    return query.first() is not None
+def count_patients_by_date(date):
+    query = db.session.query(func.count(AppointmentDetail.user_id)) \
+        .join(AppointmentList, AppointmentList.id == AppointmentDetail.appointment_list_id) \
+        .filter(AppointmentList.date == date)
+    return query.scalar()
+def get_appointment_by_date(date):
+    query = db.session.query(AppointmentList.id, AppointmentList.name, AppointmentList.date) \
+        .filter(AppointmentList.date == date)
+    return query.all()
 
 def get_invoice_details_by_user_id(user_id):
     query = db.session.query(Invoice.id, Invoice.date, Invoice.total_amount) \
@@ -372,8 +387,8 @@ def load_danh_sach_kham():
     return db.session.query(AppointmentList.id, AppointmentList.name, AppointmentList.date).all()
 
 
-def create_appointment_list():
-    dsk = AppointmentList()
+def create_appointment_list(date):
+    dsk = AppointmentList(date=date)
     db.session.add(dsk)
     db.session.commit()
 

@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from flask import flash, render_template, request, redirect, jsonify, session, url_for
 import dao, utils, json
 from flask_login import login_user, logout_user, login_required, current_user
@@ -6,6 +8,7 @@ from app.models import UserRole
 
 
 # =============== TEST CONTROLLERS =============== #
+
 
 
 # =============== USER CONTROLLERS =============== #
@@ -168,6 +171,7 @@ def load_user(user_id):
 
 
 # =============== User registers for a medical appointment =============== #
+
 @app.route("/user_dang_ky_kham", methods=['GET', 'POST'])
 def user_dang_ky_kham():
     err_msg = ''
@@ -175,8 +179,9 @@ def user_dang_ky_kham():
         with open("app/data/rules.json", "r") as file:
             rules = json.load(file)
         phone_number_input = request.form['user_dang_ky_kham']
-        date_time = request.form['appointment_date']
-        print(date_time)
+        appointment_date = request.form['appointment_date']
+        appointment_time = request.form['appointment_time']
+
         max_patient_limit = int(rules.get("so_benh_nhan", 0))
 
         patient = dao.get_users_by_phone(phone_number=phone_number_input)
@@ -190,23 +195,25 @@ def user_dang_ky_kham():
 
         user_id = patient[0][0]
 
-        if dao.load_chi_tiet_danh_sach_kham_today(user_id=user_id):
+        appointment_schedule = dao.get_appointment_by_date(appointment_date)
+        if not appointment_schedule:
+            dao.create_appointment_list(appointment_date)
+            appointment_schedule = dao.get_appointment_by_date(appointment_date)
+
+        appointment_id = appointment_schedule[0][0]
+
+        if dao.check_user_appointment_on_date(date=appointment_date, user_id=user_id):
             err_msg = "Bạn đã đăng ký rồi"
             return render_template("index.html", err_msg=err_msg)
 
-        registered_patient_count = dao.get_appointment_counts_for_today()
-        registered_patient_count = int(registered_patient_count[0][1]) if registered_patient_count else 0
-
+        registered_patient_count = dao.count_patients_by_date(appointment_date)
+        print(registered_patient_count)
         if registered_patient_count >= max_patient_limit:
             err_msg = "Số lượng bệnh nhân trong danh sách đã đầy, vui lòng đăng ký khám vào hôm sau"
             return render_template("index.html", err_msg=err_msg)
 
-        appointment_schedule_today = dao.get_appointments_for_today()
-        if not appointment_schedule_today:
-            err_msg = "Chưa có danh sách để đăng ký"
-            return render_template("index.html", err_msg=err_msg)
 
-        dao.create_appointment_detail(adppointment_id=appointment_schedule_today[0][0], user_id=user_id)
+        dao.create_appointment_detail(adppointment_id=appointment_id, user_id=user_id)
         err_msg = "Đăng ký thành công"
 
         if not dao.load_lich_su_benh(user_id=user_id):
@@ -570,4 +577,22 @@ def load_appointment_user_list():
             appointment_user_list.append(dao.load_users_by_user_id(user_id_in_dsk[i][2]))
     return {
         'appointment_user_list': appointment_user_list
+    }
+
+@app.context_processor
+def load_appointment_date():
+    today = datetime.now()
+    dates = [(today + timedelta(days=i)).strftime('%Y-%m-%d') for i in range(7)]
+    return {
+        'appointment_dates': dates
+    }
+
+@app.context_processor
+def load_appointment_time():
+    times = [
+        "08:00", "09:00", "10:00", "11:00",
+        "13:00", "14:00", "15:00", "16:00"
+    ]
+    return {
+        'appointment_times': times
     }
