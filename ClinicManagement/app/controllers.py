@@ -9,6 +9,10 @@ import cloudinary
 import cloudinary.uploader
 
 # =============== TEST CONTROLLERS =============== #
+@app.route("/appointment_register", methods=['GET'])
+@login_required
+def appointment_register_process():
+    return render_template('appointment_register.html')
 @app.route("/invoices", methods=['GET'])
 @login_required
 def view_invoices():
@@ -252,14 +256,14 @@ def user_dang_ky_kham():
 
         max_patient_limit = int(rules.get("so_benh_nhan", 0))
 
-        patient = dao.get_users_by_phone(phone_number=phone_number_input)
+        patient = dao.get_user_by_phone(phone_number=phone_number_input)
         if not patient:
             err_msg = "Không tồn tại user trong cơ sở dữ liệu"
-            return render_template("index.html", err_msg=err_msg)
+            return render_template("appointment_register.html", err_msg=err_msg)
 
         if current_user.user_role == UserRole.USER and current_user.id != patient['id']:
             err_msg = "Bạn không có SDT này hoặc bạn chưa thêm SDT này"
-            return render_template("index.html", err_msg=err_msg)
+            return render_template("appointment_register.html", err_msg=err_msg)
 
         user_id = patient['id']
 
@@ -270,11 +274,11 @@ def user_dang_ky_kham():
 
         if dao.check_user_appointment_on_date(date=appointment_date, user_id=user_id):
             err_msg = "Bạn đã đăng ký rồi"
-            return render_template("index.html", err_msg=err_msg)
+            return render_template("appointment_register.html", err_msg=err_msg)
         registered_patient_count = dao.count_patients_by_date(appointment_date)
         if registered_patient_count >= max_patient_limit:
             err_msg = "Số lượng bệnh nhân trong danh sách đã đầy, vui lòng đăng ký khám vào hôm sau"
-            return render_template("index.html", err_msg=err_msg)
+            return render_template("appointment_register.html", err_msg=err_msg)
         dao.create_appointment_detail(appointment_id=appointment_id, user_id=user_id, appointment_time=appointment_time)
         err_msg = "Đăng ký thành công"
 
@@ -297,7 +301,7 @@ def load_appointment_process():
         if appointment_id:
             appointment_details = dao.get_appointment_details(appointment_id)
             for i in appointment_details:
-                user = dao.get_users_by_user_id(i.user_id)
+                user = dao.get_user(i.user_id)
                 user_list.append(user)
             if not user_list:
                 err_msg = "Không tìm thấy bệnh nhân nào thuộc danh sách"
@@ -358,7 +362,7 @@ def doctor_get_user_by_user_id():
     err_msg = ''
     action = request.form.get('action')
     user_id = request.form.get('user_id')
-    user_info = dao.get_users_by_user_id(user_id=user_id)
+    user_info = dao.get_user(user_id=user_id)
     global ma_phieu_kham_today
     global user_id_in_phieu_kham
 
@@ -446,7 +450,7 @@ def doctor_save_phieu_kham():
     suc_msg = ''
     action = request.form.get('action')
     user_id = request.form.get('user_id')
-    user_info = dao.get_users_by_user_id(user_id=user_id)
+    user_info = dao.get_user(user_id=user_id)
 
     if action.startswith('delete'):
         try:
@@ -534,13 +538,16 @@ def process_payment():
     suc_msg = ''
     user_bill = None
     try:
+        with open("app/data/rules.json", "r") as file:
+            rules = json.load(file)
+        tien_kham = rules["tien_kham"]
         today_prescriptions = dao.get_prescriptions_for_today(user_id=user_id)
         if today_prescriptions:
             bill = dao.bill_for_one_user_by_id(user_id=user_id)
             if bill:
                 bill_id = dao.save_bill_for_user(
                     date=bill['date'],
-                    total_amount=bill['total_price'],
+                    total_amount=bill['total_price'] + tien_kham,
                     user_id=user_id
                 )
                 suc_msg = "Thanh toán thành công!"
@@ -590,12 +597,7 @@ def common_attribute():
     }
 
 
-@app.context_processor
-def get_disease():
-    diseases = dao.load_diseases()
-    return {
-        'diseases': diseases
-    }
+
 
 
 @app.context_processor
@@ -638,18 +640,7 @@ def medical_history_process():
         print(i)
     for i in all_prescriptions:
         print(i)
-    # list = []
-    # dict = {}
-    # for i in all_prescriptions:
-    #     if (i['prescription_id'], i['user_id']) not in list:
-    #         list.append(i)
-    #         dict[i['prescription_id'], i['user_id']] = 1
-    # print("debug /medical_history_process:")
-    # for i in dict:
-    #     print(i)
-    # for i in list:
-    #     print(i)
-    if not medical_history_records:
+    if kw and not medical_history_records:
         err_msg = 'Không tìm thấy bệnh nhân'
     return render_template("medical_history.html", err_msg=err_msg, patient_prescription=medical_history_records,
                            all_prescriptions=all_prescriptions)
@@ -667,7 +658,7 @@ def load_appointment_user_list():
         user_id_in_dsk = dao.get_appointment_details(dsk[0][0])
         n = len(user_id_in_dsk)
         for i in range(0, n):
-            appointment_user_list.append(dao.get_users_by_user_id(user_id_in_dsk[i][2]))
+            appointment_user_list.append(dao.get_user(user_id_in_dsk[i][2]))
     return {
         'appointment_user_list': appointment_user_list
     }
@@ -707,3 +698,10 @@ def load_today_date():
 @app.context_processor
 def load_user_role():
     return {'UserRole': UserRole}
+
+@app.context_processor
+def load_diseases():
+    diseases = dao.load_diseases()
+    return {
+        'diseases': diseases
+    }

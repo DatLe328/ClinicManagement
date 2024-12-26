@@ -94,25 +94,6 @@ def count_patients_by_date(date):
         .join(AppointmentList, AppointmentList.id == AppointmentDetail.appointment_list_id) \
         .filter(AppointmentList.date == date)
     return query.scalar()
-def create_list(date):
-    query = db.session.query(AppointmentList.id, AppointmentList.name, AppointmentList.date) \
-        .filter(AppointmentList.date == date)
-    return query.all()
-
-def get_invoice_details_by_user_id(user_id):
-    query = db.session.query(Invoice.id, Invoice.date, Invoice.total_amount) \
-        .filter(Invoice.user_id == user_id)
-    return query.all()
-
-def get_invoice_ids_by_user_id(user_id):
-    try:
-        # Query the Invoice table to find all invoices for the user
-        invoices = Invoice.query.filter_by(user_id=user_id).all()
-        return [invoice.id for invoice in invoices]
-    except Exception as e:
-        print(f"Error retrieving invoice IDs for user {user_id}: {str(e)}")
-        return []
-
 
 
 def delete_medicine_from_prescription(medicine_id, prescription_id):
@@ -166,34 +147,6 @@ def update_user_details(user_id, full_name, phone, address):
         print(f"Error updating user details: {e}")
         return False
 
-
-def load_prescription_details_today(ma_phieu_kham_today):
-    query = db.session.query(PrescriptionDetail.medicine_id, Medicine.name, Medicine.unit,
-                             PrescriptionDetail.quantity) \
-        .join(Medicine, Medicine.id.__eq__(PrescriptionDetail.medicine_id), isouter=True) \
-        .filter(PrescriptionDetail.prescription_id.__eq__(ma_phieu_kham_today))
-    return query.all()
-
-
-def delete_medicine_by_id(medicine_id):
-    try:
-        db.session.query(Medicine).filter(Medicine.id == medicine_id).delete()
-        db.session.commit()
-    except Exception as e:
-        print(f"Error while deleting medicine: {e}")
-        db.session.rollback()
-
-
-def get_today_string():
-    return datetime.now().strftime('%Y-%m-%d')
-
-
-def commit_session():
-    try:
-        db.session.commit()
-    except Exception as e:
-        db.session.rollback()
-        raise Exception(f"Database Commit Error: {str(e)}")
 
 def update_thuoc_description(thuoc_id, description):
     try:
@@ -266,16 +219,12 @@ def add_user(full_name, username, password, birth_date, gender, phone_number, ad
         user_role=user_role, status=status,
     )
     db.session.add(new_user)
-    commit_session()
+    db.session.commit()
 
 
 
 def get_user_by_username(username):
     return User.query.filter_by(username=username).first()
-
-
-def get_user_by_phone(phone_number):
-    return User.query.filter_by(phone_number=phone_number).first()
 
 
 def load_diseases():
@@ -290,7 +239,7 @@ def load_users():
     return User.query.all()
 
 
-def get_users_by_phone(phone_number=None):
+def get_user_by_phone(phone_number=None):
     query = db.session.query(User.id, User.full_name, User.phone_number)
     if phone_number:
         query = query.filter(User.phone_number.__eq__(phone_number))
@@ -517,14 +466,7 @@ def get_appointment_details(appointment_detail_id=None):
     return query.all()
 
 
-# def get_users_by_user_id(user_id=None):
-#     query = db.session.query(User.id, User.full_name,
-#                              User.gender, User.birth_date, User.address, User.phone_number)
-
-#     if user_id:
-#         query = query.filter(User.id.__eq__(user_id))
-#     return query.all()
-def get_users_by_user_id(user_id=None):
+def get_user(user_id=None, phone_number=None):
     query = db.session.query(
         User.id, 
         User.full_name,
@@ -535,7 +477,8 @@ def get_users_by_user_id(user_id=None):
     )
     if user_id:
         query = query.filter(User.id == user_id)
-    
+    if phone_number:
+        query = query.filter(User.phone_number.__eq__(phone_number))
     results = query.all()
     formatted_results = [
         {

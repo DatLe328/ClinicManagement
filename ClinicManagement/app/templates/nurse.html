@@ -13,19 +13,6 @@
             <div class="nurse row">
                 <div class="nurse-left col-md-4 col-sm-12 text-center">
                     <div class="nurse-left-infor">
-                        <div class="sub-content">
-                            <div class="user-center-img">
-                                <img style="border-radius: 50%; height: 150px; width: 150px;"
-                                     src="{{ current_user.avatar }}"
-                                     alt="{{ current_user.full_name }}">
-                            </div>
-                            <div class="card-body text-center">
-                                <h5>{{ current_user.name }}</h5>
-                                <h5>{{ current_user.user_role.name }}</h5>
-                                <h5 style="color: blue">ONLINE <i class="fas fa-toggle-on"></i></h5>
-                            </div>
-                        </div>
-
                         {% if err_msg %}
                             <div class="alert alert-danger">
                                 {{ err_msg }}
