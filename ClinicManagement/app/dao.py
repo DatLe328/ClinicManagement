@@ -9,6 +9,23 @@ from sqlalchemy import func
 from sqlalchemy.sql.functions import user
 
 # ========================== TEST ZONE ========================== #
+def get_all_invoices(user_id=None):
+    try:
+        query = db.session.query(
+            Invoice.id.label("invoice_id"),
+            Invoice.date.label("date"),
+            Invoice.total_amount.label("total_amount"),
+            User.full_name.label("user_name"),
+            User.id.label("user_id")
+        ).join(User, User.id == Invoice.user_id)
+
+        # Lọc theo user_id nếu được cung cấp
+        if user_id:
+            query = query.filter(User.id == user_id)
+
+        return query.all()
+    except Exception as e:
+        raise Exception(f"Lỗi khi lấy danh sách hóa đơn: {e}")
 def get_appointment_list_id_by_date(date):
     try:
         result = db.session.query(AppointmentList.id).filter(
@@ -252,6 +269,7 @@ def add_user(full_name, username, password, birth_date, gender, phone_number, ad
     commit_session()
 
 
+
 def get_user_by_username(username):
     return User.query.filter_by(username=username).first()
 
@@ -379,6 +397,7 @@ def save_bill_for_user(date, total_amount, user_id):
     b = Invoice(date=date, total_amount=total_amount, user_id=user_id)
     db.session.add(b)
     db.session.commit()
+    return b.id
 
 
 def check_payment_status(bill_id):
@@ -394,7 +413,7 @@ def payment(bill_id):
         db.session.commit()
 
 
-def load_hoa_don_by_phieu_kham_id(phieu_kham_id=None):  # Viết cái câu truy vấn ngon lành mà không xài được tức ghê -_-
+def load_hoa_don_by_phieu_kham_id(phieu_kham_id=None):
     query = db.session.query(User.full_name, Invoice.date, Invoice.total_amount) \
         .join(Invoice, Invoice.user_id.__eq__(User.id)) \
         .join(Prescription, Prescription.user_id.__eq__(User.id))
@@ -498,14 +517,14 @@ def get_appointment_details(appointment_detail_id=None):
     return query.all()
 
 
-# def load_users_by_user_id(user_id=None):
+# def get_users_by_user_id(user_id=None):
 #     query = db.session.query(User.id, User.full_name,
 #                              User.gender, User.birth_date, User.address, User.phone_number)
 
 #     if user_id:
 #         query = query.filter(User.id.__eq__(user_id))
 #     return query.all()
-def load_users_by_user_id(user_id=None):
+def get_users_by_user_id(user_id=None):
     query = db.session.query(
         User.id, 
         User.full_name,

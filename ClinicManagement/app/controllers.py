@@ -9,6 +9,25 @@ import cloudinary
 import cloudinary.uploader
 
 # =============== TEST CONTROLLERS =============== #
+@app.route("/invoices", methods=['GET'])
+@login_required
+def view_invoices():
+    err_msg = ''
+    user_id = request.args.get('user_id')
+    invoices = []
+
+    try:
+        if user_id:
+            invoices = dao.get_all_invoices(user_id=user_id)
+            if not invoices:
+                err_msg = "Không tìm thấy hóa đơn nào cho bệnh nhân này."
+        else:
+            invoices = dao.get_all_invoices()
+    except Exception as e:
+        err_msg = f"Lỗi xảy ra: {e}"
+    print(invoices)
+    return render_template("invoice_history.html", invoices=invoices, err_msg=err_msg)
+
 @app.route('/confirm_patient', methods=['POST'])
 def confirm_patient_process():
     err_msg = ''
@@ -278,7 +297,8 @@ def load_appointment_process():
         if appointment_id:
             appointment_details = dao.get_appointment_details(appointment_id)
             for i in appointment_details:
-                user_list.append(dao.load_users_by_user_id(i.user_id))
+                user = dao.get_users_by_user_id(i.user_id)
+                user_list.append(user)
             if not user_list:
                 err_msg = "Không tìm thấy bệnh nhân nào thuộc danh sách"
             current_date_from_db = dao.get_date_by_appointment_list_id(appointment_id)
@@ -338,7 +358,7 @@ def doctor_get_user_by_user_id():
     err_msg = ''
     action = request.form.get('action')
     user_id = request.form.get('user_id')
-    user_info = dao.load_users_by_user_id(user_id=user_id)
+    user_info = dao.get_users_by_user_id(user_id=user_id)
     global ma_phieu_kham_today
     global user_id_in_phieu_kham
 
@@ -426,7 +446,7 @@ def doctor_save_phieu_kham():
     suc_msg = ''
     action = request.form.get('action')
     user_id = request.form.get('user_id')
-    user_info = dao.load_users_by_user_id(user_id=user_id)
+    user_info = dao.get_users_by_user_id(user_id=user_id)
 
     if action.startswith('delete'):
         try:
@@ -482,29 +502,29 @@ def doctor_save_phieu_kham():
 #             err_msg = f"Lỗi xảy ra: {str(e)}"
 #     return render_template("cashier.html", err_msg=err_msg, invoices=invoices)
 
-@app.route("/cashier", methods=['GET', 'POST'])
-def cashier():
-    err_msg = ''
-    user_id = request.args.get('kw')  # Lấy mã bệnh nhân từ input
-    user_info = None
-    invoices = None
-
-    if user_id:
-        try:
-            # Lấy thông tin bệnh nhân
-            user_info = dao.get_user_by_id(user_id)
-            if not user_info:
-                err_msg = "Không tìm thấy bệnh nhân với mã này."
-            else:
-                # Lấy danh sách hóa đơn
-                invoices = dao.get_invoice_details_by_user_id(user_id)
-                if not invoices:
-                    err_msg = "Không tồn tại hóa đơn nào cho bệnh nhân này."
-                    return render_template("cashier.html", err_msg=err_msg)
-        except Exception as e:
-            err_msg = f"Lỗi xảy ra: {str(e)}"
-
-    return render_template("cashier.html", err_msg=err_msg, user_info=user_info, invoices=invoices)
+# @app.route("/cashier", methods=['GET', 'POST'])
+# def cashier():
+#     err_msg = ''
+#     user_id = request.args.get('kw')  # Lấy mã bệnh nhân từ input
+#     user_info = None
+#     invoices = None
+#
+#     if user_id:
+#         try:
+#             # Lấy thông tin bệnh nhân
+#             user_info = dao.get_user_by_id(user_id)
+#             if not user_info:
+#                 err_msg = "Không tìm thấy bệnh nhân với mã này."
+#             else:
+#                 # Lấy danh sách hóa đơn
+#                 invoices = dao.get_invoice_details_by_user_id(user_id)
+#                 if not invoices:
+#                     err_msg = "Không tồn tại hóa đơn nào cho bệnh nhân này."
+#                     return render_template("cashier.html", err_msg=err_msg)
+#         except Exception as e:
+#             err_msg = f"Lỗi xảy ra: {str(e)}"
+#
+#     return render_template("cashier.html", err_msg=err_msg, user_info=user_info, invoices=invoices)
 
 
 @app.route("/process_payment", methods=['POST'])
@@ -512,19 +532,19 @@ def process_payment():
     user_id = request.form.get('user_id')
     err_msg = ''
     suc_msg = ''
+    user_bill = None
     try:
-        # Kiểm tra xem bệnh nhân có phiếu khám hôm nay không
         today_prescriptions = dao.get_prescriptions_for_today(user_id=user_id)
         if today_prescriptions:
-            # Tạo hóa đơn nếu tồn tại phiếu khám
             bill = dao.bill_for_one_user_by_id(user_id=user_id)
             if bill:
-                dao.save_bill_for_user(
+                bill_id = dao.save_bill_for_user(
                     date=bill['date'],
                     total_amount=bill['total_price'],
                     user_id=user_id
                 )
                 suc_msg = "Thanh toán thành công!"
+                dao.payment(bill_id=bill_id)
             else:
                 err_msg = "Không tìm thấy thông tin hóa đơn."
         else:
@@ -532,43 +552,34 @@ def process_payment():
     except Exception as e:
         err_msg = f"Lỗi khi xử lý thanh toán: {str(e)}"
 
-    # Quay lại trang thanh toán với thông báo
-    return render_template("cashier.html", err_msg=err_msg, suc_msg=suc_msg)
+    return render_template("cashier.html", err_msg=err_msg, suc_msg=suc_msg, user_bill=user_bill)
 
 
 
-# @app.route("/cashier", methods=['get', 'post'])
-# def cashier():
-#     err_msg = ''
-#     user_id = request.args.get('kw')
-#     if user_id:
-#         with open("app/data/rules.json", "r") as file:
-#             rules = json.load(file)
-#         tien_kham = rules["tien_kham"]
-#         today_prescriptions = dao.get_prescriptions_for_today(user_id=user_id)
-#         print(today_prescriptions)
-#         invoices = dao.get_invoice_details_by_user_id(user_id)
-#         return render_template("cashier.html", err_msg=err_msg, invoices=invoices)
-#         # if today_prescriptions:
-#         #     phieu_kham = dao.get_prescription_details(today_prescriptions[0]['id'])
-#         #     bill_cua_user = dao.bill_for_one_user_by_id(user_id=user_id)
-#         #     tien_kham = float(tien_kham)
-#         #     if bill_cua_user and tien_kham >= 0:
-#         #         tien_thuoc = bill_cua_user['total_price'] + tien_kham
-#         #         dao.save_bill_for_user(date=phieu_kham['date'], total_amount=tien_thuoc, user_id=user_id)
-#         #         err_msg = "Thanh toán thành công"
-#         #         return render_template("cashier.html", err_msg=err_msg, tien_kham=tien_kham)
-#         #     else:
-#         #         err_msg = "Chưa có hóa đơn"
-#         #         return render_template("cashier.html", err_msg=err_msg, tien_kham=tien_kham)
-#         # else:
-#         #     err_msg = "Không tồn tại phiếu khám này trong ngày hôm nay"
-#         return render_template("cashier.html", err_msg=err_msg)
-#     return render_template("cashier.html", err_msg=err_msg)
+@app.route("/cashier", methods=['get', 'post'])
+def cashier():
+    err_msg = ''
+    user_id = request.args.get('kw')
+    user_bill = None
+    if user_id:
+        with open("app/data/rules.json", "r") as file:
+            rules = json.load(file)
 
-
-user_id_in_hoa_don_for_one_user = 0
-
+        tien_kham = rules["tien_kham"]
+        today_prescriptions = dao.get_prescriptions_for_today(user_id=user_id)
+        if today_prescriptions:
+            phieu_kham_id = today_prescriptions[0]['id']
+            # phieu_kham = dao.get_prescription_details(today_prescriptions[0]['id'])
+            hoa_don = dao.load_hoa_don_by_phieu_kham_id(phieu_kham_id=phieu_kham_id)
+            if hoa_don:
+                err_msg = "Hóa đơn đã được thanh toán!"
+                return render_template("cashier.html", err_msg=err_msg, tien_kham=tien_kham, user_bill=user_bill)
+            else:
+                user_bill = dao.bill_for_one_user_by_id(user_id=user_id)
+        else:
+            err_msg = "Không tồn tại hóa đơn của bệnh nhân này trong ngày hôm nay."
+        return render_template("cashier.html", err_msg=err_msg, tien_kham=tien_kham, user_bill=user_bill)
+    return render_template("cashier.html", err_msg=err_msg, user_bill=user_bill)
 
 @app.context_processor
 def common_attribute():
@@ -592,15 +603,6 @@ def load_hoa_don():
     danh_sach_hoa_don = dao.load_hoa_don()
     return {
         "danh_sach_hoa_don": danh_sach_hoa_don
-    }
-
-
-@app.context_processor
-def load_hoa_don_for_one_user():
-    hoa_don = dao.load_hoa_don_by_phieu_kham_id(
-        user_id_in_hoa_don_for_one_user)
-    return {
-        "hoa_don": hoa_don
     }
 
 
@@ -647,7 +649,7 @@ def medical_history_process():
     #     print(i)
     # for i in list:
     #     print(i)
-    if not all_prescriptions:
+    if not medical_history_records:
         err_msg = 'Không tìm thấy bệnh nhân'
     return render_template("medical_history.html", err_msg=err_msg, patient_prescription=medical_history_records,
                            all_prescriptions=all_prescriptions)
@@ -665,7 +667,7 @@ def load_appointment_user_list():
         user_id_in_dsk = dao.get_appointment_details(dsk[0][0])
         n = len(user_id_in_dsk)
         for i in range(0, n):
-            appointment_user_list.append(dao.load_users_by_user_id(user_id_in_dsk[i][2]))
+            appointment_user_list.append(dao.get_users_by_user_id(user_id_in_dsk[i][2]))
     return {
         'appointment_user_list': appointment_user_list
     }
@@ -701,3 +703,7 @@ def load_today_date():
     return {
         'today_date': today.strftime('%Y-%m-%d')
     }
+
+@app.context_processor
+def load_user_role():
+    return {'UserRole': UserRole}

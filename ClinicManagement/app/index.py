@@ -13,7 +13,7 @@ def index():
 @app.route("/doctor")
 def doctor():
     # kw = request.args.get('kw')
-    info = dao.load_users_by_user_id(current_user.id)
+    info = dao.get_users_by_user_id(current_user.id)
 
     return render_template("doctor.html", search_result = info)
 

@@ -1,0 +1,42 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+
+<div class="container">
+    <h1 style="font-weight: bold">Danh Sách Hóa Đơn</h1>
+    <hr>
+
+    <form method="get" action="/invoices" class="d-flex">
+        <input class="form-control me-2" type="text" name="user_id" placeholder="Mã bệnh nhân" />
+        <button class="btn btn-primary" type="submit">Tìm kiếm</button>
+    </form>
+
+    {% if err_msg %}
+        <div class="alert alert-danger mt-3">
+            {{ err_msg }}
+        </div>
+    {% endif %}
+
+    <table class="table mt-4">
+        <thead>
+            <tr>
+                <th>Mã hóa đơn</th>
+                <th>Ngày</th>
+                <th>Số tiền</th>
+                <th>Bệnh nhân</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for invoice in invoices %}
+                <tr>
+                    <td>{{ invoice.invoice_id }}</td>
+                    <td>{{ invoice.date }}</td>
+                    <td>{{ invoice.total_amount }}</td>
+                    <td>{{ invoice.user_name }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

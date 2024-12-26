@@ -106,40 +106,42 @@
                                         <td>{{ us[0].phone_number }}</td>
                                         <td>{{ us[0].address }}</td>
                                         <td>
-                                            <form method="post" action="/delete_patient" class="delete-form">
-                                                <input type="hidden" id="user_id_delete" name="user_id_delete"
-                                                       value="{{ us[0].user_id }}"/>
-                                                <input type="hidden" id="date_delete" name="date_delete"
-                                                       value="{{ current_date }}"/>
-                                                <button type="submit" class="btn btn-danger">
-                                                    Xóa
-                                                </button>
-                                            </form>
+                                            {% if not us['has_prescription'] %}
+                                                <form method="post" action="/delete_patient" class="delete-form">
+                                                    <input type="hidden" id="user_id_delete" name="user_id_delete"
+                                                           value="{{ us[0].user_id }}"/>
+                                                    <input type="hidden" id="date_delete" name="date_delete"
+                                                           value="{{ current_date }}"/>
+                                                    <button type="submit" class="btn btn-danger">Xóa</button>
+                                                </form>
+                                            {% endif %}
                                         </td>
                                         <td>
-                                            <form method="post" action="/confirm_patient" class="confirm-form"
-                                                  style="display: inline;">
-                                                <input type="hidden" id="user_id_confirm" name="user_id_confirm"
-                                                       value="{{ us[0].user_id }}"/>
-                                                <input type="hidden" id="date_confirm" name="date_confirm"
-                                                       value="{{ current_date }}"/>
-                                                <button type="submit" class="btn btn-success">Xác nhận</button>
-                                            </form>
+                                            {% if not us['has_prescription'] %}
+                                                <form method="post" action="/confirm_patient" class="confirm-form"
+                                                      style="display: inline;">
+                                                    <input type="hidden" id="user_id_confirm" name="user_id_confirm"
+                                                           value="{{ us[0].user_id }}"/>
+                                                    <input type="hidden" id="date_confirm" name="date_confirm"
+                                                           value="{{ current_date }}"/>
+                                                    <button type="submit" class="btn btn-success">Xác nhận</button>
+                                                </form>
+                                            {% endif %}
                                         </td>
                                     </tr>
                                 {% endfor %}
                             </table>
                         </div>
-                        {% if today_date == current_date %}
-                            <div class="bt-confirm form-floating mt-3 mb-3">
-                                <form method="post" enctype="multipart/form-data"
-                                      action="/save_chi_tiet_danh_sach_kham">
-                                    <input type="hidden" id="current_date_submit" name="current_date_submit"
-                                           value="{{ current_date }}"/>
-                                    <button type="submit" class="btn btn-success">Lưu danh sách</button>
-                                </form>
-                            </div>
-                        {% endif %}
+{#                        {% if today_date == current_date %}#}
+{#                            <div class="bt-confirm form-floating mt-3 mb-3">#}
+{#                                <form method="post" enctype="multipart/form-data"#}
+{#                                      action="/save_chi_tiet_danh_sach_kham">#}
+{#                                    <input type="hidden" id="current_date_submit" name="current_date_submit"#}
+{#                                           value="{{ current_date }}"/>#}
+{#                                    <button type="submit" class="btn btn-success">Lưu danh sách</button>#}
+{#                                </form>#}
+{#                            </div>#}
+{#                        {% endif %}#}
                     </div>
 
                 </div>
