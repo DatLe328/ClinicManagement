@@ -114,6 +114,7 @@ def delete_appointment_detail_by_user_and_date(user_id, date):
     except Exception as e:
         db.session.rollback()
         raise Exception(f"Error deleting appointment detail: {e}")
+
 def check_user_appointment_on_date(user_id, date):
 
     query = db.session.query(AppointmentDetail.id) \
@@ -258,7 +259,6 @@ def add_user(full_name, username, password, birth_date, gender, phone_number, ad
     db.session.commit()
 
 
-
 def get_user_by_username(username):
     return User.query.filter_by(username=username).first()
 
@@ -332,7 +332,6 @@ def stats_by_medic(kw=None, from_date=None, to_date=None):
 
 
 def stats_by_revenue(month=None):
-    # Invoice, User
     query = db.session.query(Invoice.date, func.count(User.id), func.sum(Invoice.total_amount)).join(Invoice,
                                                                                                      Invoice.user_id.__eq__(
                                                                                                          User.id))
@@ -492,7 +491,6 @@ def get_appointment_today():
 
 
 def get_appointment_details(appointment_detail_id=None):
-
     query = db.session.query(
         AppointmentDetail.id.label('appointment_detail_id'),
         AppointmentDetail.appointment_list_id.label('appointment_list_id'),
@@ -533,11 +531,6 @@ def get_user(user_id=None, phone_number=None):
 
 
 # ====================================================================================
-
-def get_newest_appoinment_id():
-    return db.session.query(func.max(AppointmentList.id)).first()[0]
-
-
 def create_prescription(user_id):
     if not user_id:
         raise ValueError("User ID không hợp lệ")
@@ -546,20 +539,6 @@ def create_prescription(user_id):
     db.session.commit()
     return prescription
 
-
-
-# def get_prescriptions_for_today(user_id=None):
-#     query = db.session.query(Prescription.id, Prescription.name, Prescription.date, Prescription.symptoms,
-#                              Prescription.diagnosis, Prescription.user_id, User.full_name).join(User, User.id.__eq__(
-#         Prescription.user_id))
-#     today = datetime.now()
-#     todayString = str(today)[0:10]
-#     query = query.filter(Prescription.date.__eq__(todayString))
-#
-#     if user_id:
-#         query = query.filter(Prescription.user_id.__eq__(user_id))
-#
-#     return query.all() or []
 
 def get_prescriptions_for_today(user_id=None):
     try:
@@ -665,9 +644,8 @@ def add_medical_history(user_id):
     db.session.commit()
 
 
-def load_lich_su_benh(user_id=None):
+def get_medical_history(user_id=None):
     query = db.session.query(MedicalHistory.id, MedicalHistory.name, MedicalHistory.user_id)
-
     if user_id:
         query = query.filter(MedicalHistory.user_id.__eq__(user_id))
 

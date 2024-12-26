@@ -26,20 +26,7 @@ def nurse_process():
     return render_template("nurse.html", current_date=current_date)
 
 
-@app.context_processor
-def load_medicines():
-    medicines = dao.get_medicines()
-    return {
-        'medicines': medicines
-    }
 
-
-@app.context_processor
-def load_phieu_kham():
-    phieu_kham = dao.get_prescriptions_for_today()
-    return {
-        'phieu_kham': phieu_kham
-    }
 
 
 if __name__ == '__main__':
