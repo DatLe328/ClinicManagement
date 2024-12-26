@@ -384,9 +384,11 @@ def doctor():
     return render_template("doctor.html", search_result = info)
 
 
-#
-#
-#
+# - ma_phieu_kham_today để lưu mã phiếu khám mình đang thao tác
+# - user_id_in_phieu_kham để lưu user của phiếu khám đang thao tác
+# - symptoms, diagnosis chỉ để giữ lại giá trị của các mục mình điền để không bị
+#   mất đi khi thực hiện các thao tác
+# - Trong route này sẽ thực hiện hai thao tác là tìm kiếm và thêm đơn thuốc
 @app.route("/add_prescription", methods=['GET', 'POST'])
 def add_prescription_process():
     err_msg = ''
@@ -398,12 +400,11 @@ def add_prescription_process():
     if not user_id:
         err_msg = "Không tồn tại bệnh nhân hoặc bệnh nhân chưa đăng ký khám"
         return render_template("doctor.html", err_msg=err_msg, user_id=user_id)
-
+    medical_history = dao.load_disease_history(user_id=user_id)
     if action == "search_patient":
         user_prescriptions = dao.get_prescriptions_for_today(user_id=user_id)
         symptoms = ""
         diagnosis = ""
-        print(diagnosis)
         if user_prescriptions:
             current_prescription = user_prescriptions[0]
             session['ma_phieu_kham_today'] = current_prescription['id']
@@ -414,7 +415,7 @@ def add_prescription_process():
             err_msg = "Không tồn tại bệnh nhân hoặc bệnh nhân chưa đăng ký khám"
 
         return render_template("doctor.html", err_msg=err_msg, search_result=user_info, user_id=user_id, symptoms=symptoms,
-                               diagnosis=diagnosis)
+                               diagnosis=diagnosis, medical_history=medical_history)
 
     medicine_name = request.form.get('medicine')
     quantity = int(request.form.get('so_luong_thuoc', 0))
@@ -455,7 +456,7 @@ def add_prescription_process():
         )
 
     return render_template("doctor.html", err_msg=err_msg, user_id=user_id,
-                           search_result=user_info,symptoms=symptoms, diagnosis=diagnosis)
+                           search_result=user_info,symptoms=symptoms, diagnosis=diagnosis, medical_history=medical_history)
 
 
 
@@ -634,11 +635,11 @@ def view_invoices():
 
     try:
         if user_id:
-            invoices = dao.get_all_invoices(user_id=user_id)
+            invoices = dao.get_invoices(user_id=user_id)
             if not invoices:
                 err_msg = "Không tìm thấy hóa đơn nào cho bệnh nhân này."
         else:
-            invoices = dao.get_all_invoices()
+            invoices = dao.get_invoices()
     except Exception as e:
         err_msg = f"Lỗi xảy ra: {e}"
     print(invoices)

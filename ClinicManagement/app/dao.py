@@ -9,7 +9,39 @@ from sqlalchemy import func
 from sqlalchemy.sql.functions import user
 
 # ========================== TEST ZONE ========================== #
-def get_all_invoices(user_id=None):
+def load_disease_history(user_id):
+    try:
+        query = db.session.query(
+            User.id.label('user_id'),
+            User.full_name.label('user_name'),
+            MedicalHistory.id.label('medical_history_id'),
+            MedicalHistory.name.label('medical_history_name'),
+            Disease.id.label('disease_id'),
+            Disease.name.label('disease_name')
+        ).join(MedicalHistory, User.id == MedicalHistory.user_id) \
+            .join(MedicalHistoryDetail, MedicalHistoryDetail.medical_history_id == MedicalHistory.id) \
+            .join(Disease, Disease.id == MedicalHistoryDetail.disease_id) \
+            .filter(User.id == user_id)
+
+        results = [
+            {
+                'user_id': record.user_id,
+                'user_name': record.user_name,
+                'medical_history_id': record.medical_history_id,
+                'medical_history_name': record.medical_history_name,
+                'disease_id': record.disease_id,
+                'disease_name': record.disease_name
+            }
+            for record in query.all()
+        ]
+
+        return results
+    except Exception as e:
+        print(f"Error loading disease history: {e}")
+        return []
+
+
+def get_invoices(user_id=None):
     try:
         query = db.session.query(
             Invoice.id.label("invoice_id"),
@@ -19,7 +51,6 @@ def get_all_invoices(user_id=None):
             User.id.label("user_id")
         ).join(User, User.id == Invoice.user_id)
 
-        # Lọc theo user_id nếu được cung cấp
         if user_id:
             query = query.filter(User.id == user_id)
 

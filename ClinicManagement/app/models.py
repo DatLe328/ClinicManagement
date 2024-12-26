@@ -189,11 +189,11 @@ if __name__ == '__main__':
         ald2_al1 = AppointmentDetail(appointment_list_id=1, user_id=4)
         ald1_al2 = AppointmentDetail(appointment_list_id=2, user_id=5)
 
-        d1 = Disease(name="Back pain")
-        d2 = Disease(name="Headache")
-        d3 = Disease(name="Stomachache")
-        d4 = Disease(name="Toothache")
-        d5 = Disease(name="Heart pain")
+        d1 = Disease(name="Đau lưng")
+        d2 = Disease(name="Đau đầu")
+        d3 = Disease(name="Đau bụng")
+        d4 = Disease(name="Đau răng")
+        d5 = Disease(name="Đau tim")
 
         mh1 = MedicalHistory(name="Medical History 1", user_id=3)
         mh2 = MedicalHistory(name="Medical History 2", user_id=4)

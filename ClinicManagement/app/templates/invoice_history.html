@@ -26,6 +26,7 @@
                     <thead>
                     <tr>
                         <th>Mã hóa đơn</th>
+                        <th>Mã bệnh nhân</th>
                         <th>Ngày</th>
                         <th>Số tiền</th>
                         <th>Bệnh nhân</th>
@@ -35,6 +36,7 @@
                     {% for invoice in invoices %}
                         <tr>
                             <td>{{ invoice.invoice_id }}</td>
+                            <td>{{ invoice.user_id }}</td>
                             <td>{{ invoice.date }}</td>
                             <td>{{ "{:,.0f}".format(invoice.total_amount) }}</td>
                             <td>{{ invoice.user_name }}</td>
