@@ -100,18 +100,23 @@ def login_process():
 
     return render_template('login.html')
 
+
 @app.route('/update-profile', methods=['POST'])
-def update_profile():
+def update_profile_process():
     if not current_user.is_authenticated:
         return redirect(url_for('login_process'))
 
     full_name = request.form.get('name')
     phone = request.form.get('phone')
     address = request.form.get('address')
-
+    avatar = request.files.get('avatar')
+    avatar_path = None
+    if avatar:
+        res = cloudinary.uploader.upload(avatar)
+        avatar_path = res['secure_url']
     try:
-        user_updated = dao.update_user_details(current_user.id, full_name, phone, address)
-
+        user_updated = dao.update_user(user_id=current_user.id, full_name=full_name,
+                                       phone_number=phone, address=address, avatar=avatar_path)
         if user_updated:
             flash('Đã lưu thông tin thông tin thành công!', 'success')
         else:
@@ -158,7 +163,7 @@ def register_process():
         birth_day = request.form.get('birth_day')
         address = request.form.get('address')
         telephone = request.form.get('telephone')
-        sex = request.form.get('sex')
+        gender = request.form.get('sex')
         avatar = request.files.get('avatar')
 
         existing_user = dao.get_user_by_username(username=username)
@@ -183,7 +188,7 @@ def register_process():
                     username=username,
                     password=hashed_password,
                     birth_date=birth_day,
-                    gender=int(sex),
+                    gender=int(gender),
                     phone_number=telephone,
                     address=address,
                     avatar=avatar_path,
@@ -246,6 +251,7 @@ def load_user(user_id):
 @app.route("/user_dang_ky_kham", methods=['GET', 'POST'])
 def user_dang_ky_kham():
     err_msg = ''
+    suc_msg = ''
     if request.method == 'POST':
         with open("app/data/rules.json", "r") as file:
             rules = json.load(file)
@@ -277,15 +283,15 @@ def user_dang_ky_kham():
             return render_template("appointment_register.html", err_msg=err_msg)
         registered_patient_count = dao.count_patients_by_date(appointment_date)
         if registered_patient_count >= max_patient_limit:
-            err_msg = "Số lượng bệnh nhân trong danh sách đã đầy, vui lòng đăng ký khám vào hôm sau"
+            err_msg = "Số lượng bệnh nhân trong danh sách đã đầy, vui lòng đăng ký vào ngày khác"
             return render_template("appointment_register.html", err_msg=err_msg)
         dao.create_appointment_detail(appointment_id=appointment_id, user_id=user_id, appointment_time=appointment_time)
-        err_msg = "Đăng ký thành công"
+        suc_msg = "Đăng ký thành công"
 
         if not dao.load_lich_su_benh(user_id=user_id):
             dao.add_medical_history(user_id=user_id)
 
-    return render_template("index.html", err_msg=err_msg)
+    return render_template("appointment_register.html", err_msg=err_msg, suc_msg=suc_msg)
 
 
 

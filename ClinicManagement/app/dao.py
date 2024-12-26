@@ -132,14 +132,19 @@ def get_email_by_user_id(user_id):
         return user.email
     return None
 
-def update_user_details(user_id, full_name, phone, address):
+def update_user(user_id=None, full_name=None, phone_number=None, address=None, avatar=None):
     try:
         user = User.query.get(user_id)
         if user:
-            user.full_name = full_name
-            user.phone_number = phone
-            user.address = address
-            db.session.commit()  # Save changes
+            if full_name:
+                user.full_name = full_name
+            if phone_number:
+                user.phone_number = phone_number
+            if address:
+                user.address = address
+            if avatar:
+                user.avatar = avatar
+            db.session.commit()
             return True
         return False
     except Exception as e:

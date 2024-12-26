@@ -15,10 +15,13 @@
                 <li class="nav-item">
                     <a class="nav-link text-white" href="/">Trang chủ</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white" href="/appointment_register">Đăng ký khám</a>
-                </li>
+
                 {% if current_user.is_authenticated %}
+                    {% if current_user.user_role != UserRole.DOCTOR or current_user.user_role == UserRole.CASHIER %}
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/appointment_register">Đăng ký khám</a>
+                    </li>
+                    {% endif %}
                     {% if current_user.user_role == UserRole.NURSE or current_user.user_role == UserRole.ADMIN %}
                     <li class="nav-item">
                         <a class="nav-link text-white" href="/nurse">Lập danh sách khám</a>

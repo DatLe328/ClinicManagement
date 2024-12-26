@@ -25,7 +25,13 @@
                             <h5 class="my-3">{{ user.full_name }}</h5>
                             <p class="text-muted mb-1">ID: {{ user.id }}</p>
                             <p class="text-muted mb-1">ID: {{ user.user_role }}</p>
-                            <button class="btn btn-primary mt-3">Upload Avatar</button>
+                            <form method="POST" action="/update-profile" enctype="multipart/form-data">
+                                <div class="form-floating mt-3 mb-3">
+                                    <input type="file" class="form-control" id="avatar" name="avatar" accept="image/*">
+                                    <label for="avatar">Ảnh đại diện</label>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Save</button>
+                            </form>
                         </div>
                     </div>
                 </div>

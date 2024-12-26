@@ -12,21 +12,8 @@
 <h1 style="margin: 2% 1%; font-weight: bold; color: black" class="text-center">TRANG CHỦ QUẢN TRỊ PHÒNG MẠCH TƯ</h1>
 
 
-<div class="admin row">
-    <div class="admin-left col-md-4 col-sm-12text-center">
-        <div class="admin-left-img">
-            <img src="{{ current_user.anhDaiDien }}">
-        </div>
-
-        <div class="admin-left-infor">
-            <h4>{{ current_user.full_name }}</h4>
-            <h4>{{ current_user.user_role.name }}</h4>
-            <h4>{{ current_user.birth_date }}</h4>
-            <h4>ONLINE<i class="fas fa-toggle-on"></i></h4>
-        </div>
-    </div>
-
-    <div class="admin-right col-md-8 col-sm-12">
+<div class="border row d-flex justify-content-center">
+    <div class="col-md-6 col-sm-8">
         <canvas id="cateStats"></canvas>
         <canvas id="userStats"></canvas>
     </div>
