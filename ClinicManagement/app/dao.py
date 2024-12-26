@@ -260,6 +260,7 @@ def auth_user(username, password, role=None):
     query =   User.query.filter(User.username.__eq__(username.strip()), User.password.__eq__(password))
     if role != None:
         query = query.filter(User.user_role.__eq__(role))
+    query = query.filter(User.status == True)
     return query.first()
 
 
@@ -605,7 +606,7 @@ def load_phieu_kham_id_today_by_phieu_kham_id(phieu_kham_id=None):
 
 
 def load_thuoc_in_chi_tiet_phieu_kham_today(user_id=None):
-    if user_id == 0:
+    if user_id == None:
         return []
     query = db.session.query(Medicine.id, Medicine.name, Medicine.unit, PrescriptionDetail.quantity,
                              Medicine.description,

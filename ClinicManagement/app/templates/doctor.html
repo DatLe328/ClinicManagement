@@ -16,7 +16,7 @@
                             <div>
                                 <h4 style="font-weight:bold">Tra cứu bệnh nhân</h4>
                                 <p>
-                                    Nhập mã bệnh nhân và nhấn kiểm tra để kiểm tra xem thông tin 
+                                    Nhập mã bệnh nhân và nhấn kiểm tra để kiểm tra xem thông tin
                                     bệnh nhân chính xác.
                                 </p>
                             </div>
@@ -25,7 +25,8 @@
                                 <label for="u-id" class="lb-id form-label">Mã bệnh nhân:</label>
                                 <input type="text" class="form-control" placeholder="Nhập mã bệnh nhân" name="user_id"
                                        value="{{ user_id }}">
-                                <button class="btn btn-primary" type="submit" name="action" value="search_patient">Kiểm tra
+                                <button class="btn btn-primary" type="submit" name="action" value="search_patient">Kiểm
+                                    tra
                                 </button>
                             </div>
 
@@ -34,10 +35,10 @@
                                     <h5 class="fw-bold">Thông tin bệnh nhân:</h5>
                                     <ul class="list-group">
                                         <!-- <li>{{ search_result }}</li> -->
-                                        <li class="list-group-item">Mã bệnh nhân: 
+                                        <li class="list-group-item">Mã bệnh nhân:
                                             <span class="fw-bold">{{ search_result[0].user_id }}</span>
                                         </li>
-                                        <li class="list-group-item">Họ tên: 
+                                        <li class="list-group-item">Họ tên:
                                             <span class="fw-bold">{{ search_result[0].full_name }}</span>
                                         </li>
                                         <li class="list-group-item">Giới tính:
@@ -53,11 +54,11 @@
                                     <h5 class="fw-bold">Thông tin bệnh nhân:</h5>
                                     <ul class="list-group">
                                         <!-- <li>{{ search_result }}</li> -->
-                                        <li class="list-group-item">Họ tên: 
+                                        <li class="list-group-item">Họ tên:
                                             <span class="fw-bold"></span>
                                         </li>
                                         <li class="list-group-item">Giới tính:</li>
-                                        <li class="list-group-item">Ngày sinh: </li>
+                                        <li class="list-group-item">Ngày sinh:</li>
                                     </ul>
                                 {% endif %}
                             </div>
@@ -84,9 +85,12 @@
                                     <input type="number" min="1" value="1" class="form-control" name="so_luong_thuoc"/>
                                 </div>
                             </div>
-                            <button class="bt-add btn btn-primary" type="submit" name="action" value="add_prescription">
-                                Thêm
-                            </button>
+                            {% if is_user_have_appointment %}
+                                <button class="bt-add btn btn-primary" type="submit" name="action"
+                                        value="add_prescription">
+                                    Thêm
+                                </button>
+                            {% endif %}
                         </div>
                         {% if err_msg %}
                             <div class="alert alert-danger">
@@ -103,7 +107,7 @@
 
 
                 <div class="doctor-right col-md-8 col-sm-12">
-                    <form method="post" enctype="multipart/form-data" action="/doctor_save_phieu_kham">
+                    <form method="post" enctype="multipart/form-data" action="/doctor_save_prescription">
                         <div>
                             <h2 style="font-weight: bold">PHIẾU KHÁM BỆNH</h2>
                             <p>
@@ -132,11 +136,13 @@
                                         <div class="mb-3 mt-3">
                                             <div class="m-diagnostic">
                                                 <label class="form-label">Chuẩn đoán:</label>
-                                                <select class="form-select" name="chuan_doan" id="diseases">
+                                                <select class="form-select" name="chuan_doan" id="chuan_doan">
                                                     {% if diagnosis %}
-                                                        <option value="" selected disabled>Hiện tại: {{ diagnosis }}</option>
+                                                        <option value="" selected disabled>Hiện
+                                                            tại: {{ diagnosis }}</option>
                                                     {% else %}
-                                                        <option value="" selected disabled>Vui lòng chọn chuẩn đoán</option>
+                                                        <option value="" selected disabled>Vui lòng chọn chuẩn đoán
+                                                        </option>
                                                     {% endif %}
                                                     {% for d in diseases %}
                                                         <option>{{ d.name }}</option>
@@ -153,14 +159,14 @@
                             <table class="table">
                                 <tr>
                                     <th>Mã <br> phiếu khám</th>
-                                    <th>Mã <br> bệnh nhân</th>   
+                                    <th>Mã <br> bệnh nhân</th>
                                     <th>Thuốc</th>
                                     <th>Đơn vị</th>
                                     <th>Số lượng</th>
                                     <th>Cách dùng</th>
                                     <th></th>
                                 </tr>
-                                {% for t in thuoc_trong_ctpk %}
+                                {% for t in medicines_in_prescription %}
                                     <tr>
                                         <td>{{ t.prescription_id }}</td>
                                         <td>{{ t.user_id }}</td>
@@ -170,15 +176,18 @@
                                         <td>{{ t.description }}</td>
                                         <td>
                                             <button type="submit" name="action" value="delete-{{ t.id }}"
-                                                    class="btn btn-primary">Xóa</button>
+                                                    class="btn btn-primary">Xóa
+                                            </button>
                                         </td>
                                     </tr>
                                 {% endfor %}
                             </table>
                         </div>
-                        <button type="submit" name="action" value="save"
-                                class="btn btn-primary form-floating mt-3 mb-3 text-center">Save
-                        </button>
+                        {% if is_user_have_appointment %}
+                            <button type="submit" name="action" value="save-{{ user_id }}"
+                                    class="btn btn-primary form-floating mt-3 mb-3 text-center">{{ user_id }}
+                            </button>
+                        {% endif %}
                     </form>
                 </div>
             </div>

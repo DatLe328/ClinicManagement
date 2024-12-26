@@ -138,32 +138,31 @@ if __name__ == '__main__':
         password = str(hashlib.md5(password.encode('utf-8')).hexdigest())
         password_admin = str(hashlib.md5(password_admin.encode('utf-8')).hexdigest())
 
-       # Seed Users
         u1 = User(full_name="Lê Văn Đạt", username="admin", password=password_admin, gender=True,
                   phone_number="0123", address="Ho Chi Minh City", email='hoquochuy99.2019@gmail.com',
-                  avatar="http://it.ou.edu.vn/asset/ckfinder/userfiles/5/images/giang_vien/Vinh_2.jpg", user_role=UserRole.ADMIN)
+                  avatar="https://res.cloudinary.com/dvy7nvssm/image/upload/v1735196752/syfud0anik9cqtjgxsps.jpg", user_role=UserRole.ADMIN)
         u2 = User(full_name="Hồ Quốc Huy", username="cashier", password=password, gender=False,
                   phone_number="0124", address="Ho Chi Minh City",
-                  avatar="http://it.ou.edu.vn/asset/ckfinder/userfiles/5/images/giang_vien/Vinh_2.jpg", user_role=UserRole.CASHIER)
+                  avatar="https://res.cloudinary.com/dvy7nvssm/image/upload/v1735196752/syfud0anik9cqtjgxsps.jpg", user_role=UserRole.CASHIER)
         u3 = User(full_name="Lê Nguyễn Đức Huy", username="nurse", password=password, gender=False,
                   phone_number="0125", address="Ho Chi Minh City",
-                  avatar="http://example.com/avatar3.jpg", user_role=UserRole.NURSE)
+                  avatar="https://res.cloudinary.com/dvy7nvssm/image/upload/v1735196868/d8egzpstsk60zluk5sza.jpg", user_role=UserRole.NURSE)
         u4 = User(full_name="Lưu Quang Tạ", username="doctor", password=password, gender=True, phone_number="0126",
                   address="Ho Chi Minh City",
-                  avatar="http://example.com/avatar4.jpg", user_role=UserRole.DOCTOR)
+                  avatar="https://res.cloudinary.com/dvy7nvssm/image/upload/v1735196868/d8egzpstsk60zluk5sza.jpg", user_role=UserRole.DOCTOR)
         u5 = User(full_name="Bùi Thùy Dương", username="user", password=password, gender=True, phone_number="0127",
                   address="Ho Chi Minh City",
-                  avatar="http://example.com/avatar5.jpg", user_role=UserRole.USER)
+                  avatar="https://res.cloudinary.com/dvy7nvssm/image/upload/v1735196868/d8egzpstsk60zluk5sza.jpg", user_role=UserRole.USER)
         u6 = User(full_name="Tăng Duy Tân", username="user1", password=password, gender=True, phone_number="0128",
                   address="Phu Nhuan",
-                  avatar="http://example.com/avatar6.jpg", user_role=UserRole.USER)
+                  avatar="https://res.cloudinary.com/dvy7nvssm/image/upload/v1735196752/syfud0anik9cqtjgxsps.jpg", user_role=UserRole.USER)
 
-        # Seed Medicine Categories
+
         mc1 = MedicineCategory(category_name="Thuốc dạng lỏng")
         mc2 = MedicineCategory(category_name="Thuốc dạng viên")
         mc3 = MedicineCategory(category_name="Thuốc dạng bột")
 
-        # Seed Medicines
+
         m1 = Medicine(name="Paracetamol", price=50000, unit="Viên", description="1 lần 1 ngày", category_id=2)
         m2 = Medicine(name="Vitamin C", price=10000, unit="Viên", description="2 lần 1 ngày", category_id=2)
         m3 = Medicine(name="Y", price=5000, unit="Milli", description="3 lần 1 ngày", category_id=1)
@@ -171,12 +170,10 @@ if __name__ == '__main__':
         m5 = Medicine(name="Adrenaline", price=30000, unit="Viên", description="2 lần 1 ngày", category_id=3)
         m6 = Medicine(name="Probiotic", price=15000, unit="Viên", description="2 lần 1 ngày", category_id=3)
 
-        # Seed Prescriptions
         p1 = Prescription(name="Prescription 1", symptoms="Đau bụng", diagnosis="Viêm loét dạ dày", user_id=3, date=date(2024,1,1))
         p2 = Prescription(name="Prescription 2", symptoms="Đau vai", diagnosis="Thoái hoá cột sống", user_id=4,date=date(2024,1,1))
         p3 = Prescription(name="Prescription 3", symptoms="Đau tim", diagnosis="Nhồi máu cơ tim", user_id=5,date=date(2024,1,2))
 
-        # Seed Prescription Details
         pd1_p1 = PrescriptionDetail(quantity=3, medicine_id=3, prescription_id=1)
         pd2_p1 = PrescriptionDetail(quantity=2, medicine_id=5, prescription_id=1)
         pd3_p1 = PrescriptionDetail(quantity=10, medicine_id=6, prescription_id=1)
@@ -185,34 +182,23 @@ if __name__ == '__main__':
         pd1_p3 = PrescriptionDetail(quantity=8, medicine_id=2, prescription_id=3)
         pd2_p3 = PrescriptionDetail(quantity=15, medicine_id=6, prescription_id=3)
 
-        # Seed Appointment Lists
         al1 = AppointmentList(name="Appointment List 1", date=date(2024,1,1))
         al2 = AppointmentList(name="Appointment List 2", date=date(2024,1,2))
 
-        # Seed Appointment List Details
         ald1_al1 = AppointmentDetail(appointment_list_id=1, user_id=3)
         ald2_al1 = AppointmentDetail(appointment_list_id=1, user_id=4)
         ald1_al2 = AppointmentDetail(appointment_list_id=2, user_id=5)
 
-        # Seed Diseases
         d1 = Disease(name="Back pain")
         d2 = Disease(name="Headache")
         d3 = Disease(name="Stomachache")
         d4 = Disease(name="Toothache")
         d5 = Disease(name="Heart pain")
 
-        # Seed Medical Histories
         mh1 = MedicalHistory(name="Medical History 1", user_id=3)
         mh2 = MedicalHistory(name="Medical History 2", user_id=4)
         mh3 = MedicalHistory(name="Medical History 3", user_id=5)
 
-        # Seed Medical History Details
-        # mhd1_mh1 = MedicalHistoryDetail(medical_history_id=1, disease_id=1, date=date(2024, 1, 1))
-        # mhd2_mh1 = MedicalHistoryDetail(medical_history_id=1, disease_id=2, date=date(2024, 1, 1))
-        # mhd3_mh1 = MedicalHistoryDetail(medical_history_id=2, disease_id=3, date=date(2024, 1, 1))
-        # mhd1_mh2 = MedicalHistoryDetail(medical_history_id=2, disease_id=4, date=date(2024, 1, 1))
-        # mhd2_mh2 = MedicalHistoryDetail(medical_history_id=2, disease_id=5, date=date(2024, 1, 1))
-        # mhd1_mh3 = MedicalHistoryDetail(medical_history_id=3, disease_id=5, date=date(2024, 1, 2))
 
         mhd1_mh1 = MedicalHistoryDetail(medical_history_id=1, disease_id=1)
         mhd2_mh1 = MedicalHistoryDetail(medical_history_id=1, disease_id=2)
@@ -220,40 +206,22 @@ if __name__ == '__main__':
         mhd1_mh2 = MedicalHistoryDetail(medical_history_id=2, disease_id=4)
         mhd2_mh2 = MedicalHistoryDetail(medical_history_id=2, disease_id=5)
         mhd1_mh3 = MedicalHistoryDetail(medical_history_id=3, disease_id=5)
-        # Seed Invoices
+
         i1 = Invoice(name="Invoice 1", total_amount=1000000, user_id=3, date=date(2024, 1, 1))
         i2 = Invoice(name="Invoice 2", total_amount=2000000, user_id=4, date=date(2024, 1, 1))
         i3 = Invoice(name="Invoice 3", total_amount=4000000, user_id=5, date=date(2024, 1, 2))
 
-        # Add all data to the session
         db.session.add_all([u1, u2, u3, u4, u5, u6])
         db.session.add_all([mc1, mc2, mc3])
         db.session.add_all([m1, m2, m3, m4, m5, m6])
         db.session.add_all([d1, d2, d3, d4, d5])
-        # db.session.add_all([p1, p2, p3])
-        # db.session.add_all([pd1_p1, pd2_p1, pd3_p1, pd1_p2, pd2_p2, pd1_p3, pd2_p3])
-        # db.session.add_all([al1, al2])
-        # db.session.add_all([ald1_al1, ald2_al1, ald1_al2])
-        # db.session.add_all([mh1, mh2, mh3])
-        # db.session.add_all([mhd1_mh1, mhd2_mh1, mhd3_mh1, mhd1_mh2, mhd2_mh2, mhd1_mh3])
-        # db.session.add_all([i1, i2, i3])
+        db.session.add_all([p1, p2, p3])
+        db.session.add_all([pd1_p1, pd2_p1, pd3_p1, pd1_p2, pd2_p2, pd1_p3, pd2_p3])
+        db.session.add_all([al1, al2])
+        db.session.add_all([ald1_al1, ald2_al1, ald1_al2])
+        db.session.add_all([mh1, mh2, mh3])
+        db.session.add_all([mhd1_mh1, mhd2_mh1, mhd3_mh1, mhd1_mh2, mhd2_mh2, mhd1_mh3])
+        db.session.add_all([i1, i2, i3])
 
-        # pp = Prescription(name="Prescription 1", symptoms="Stomachache", diagnosis="Stomach Ulcer", user_id=1,
-        #                   date=date(2024, 12, 19))
-        # dd = PrescriptionDetail(quantity=3, medicine_id=3, prescription_id=1)
-        # aa = AppointmentList(name="Appointment List 1", date=date(2024, 12, 19))
-        # bb = AppointmentDetail(appointment_list_id=1, user_id=1)
-        # mm = MedicalHistory(name="Medical History 1", user_id=1)
-        # kk = MedicalHistoryDetail(medical_history_id=1, disease_id=1)
-        # db.session.add_all([pp, dd, aa, bb, mm, kk])
 
-        # uu = Prescription(name="Prescription 2", symptoms="dau dau", diagnosis="tieu chay", user_id=1,
-        #                   date=date(2024, 12, 20))
-        # ii = PrescriptionDetail(quantity=5, medicine_id=2, prescription_id=2)
-        # oo = AppointmentList(name="Appointment List 2", date=date(2024, 12, 20))
-        # yy = AppointmentDetail(appointment_list_id=2, user_id=1)
-        # rr = MedicalHistory(name="Medical History 2", user_id=1)
-        # ee = MedicalHistoryDetail(medical_history_id=2, disease_id=1)
-        # db.session.add_all([uu, ii, oo, yy, rr, ee])
-        # Commit the session
         db.session.commit()

@@ -93,6 +93,14 @@ class MyAdminView(AdminIndexView):
         userRoleStats = dao.count_user()
         return self.render('admin/index.html', userRoleStats=userRoleStats, statsProduct=statsProduct)
 
+class UserView(AdminView):
+    column_list = ('username', 'email', 'user_role', 'status')
+    form_columns = ('username', 'email', 'user_role', 'status')
+    column_searchable_list = ['username']
+    column_filters = ['id', 'username', 'email']
+    can_export = True
+    page_size = 10
+
 class MedicineView(AdminView):
     column_list = ('name', 'price', 'unit', 'status', 'category_id', 'description')
     form_columns = ('name', 'price', 'unit', 'status', 'category_id', 'description')
@@ -106,7 +114,7 @@ class MedicineView(AdminView):
     }
 
 admin = Admin(app=app, name='QUẢN TRỊ', template_mode='bootstrap4', index_view=MyAdminView())
-admin.add_view(AdminView(User, db.session, name='Tài khoản'))
+admin.add_view(UserView(User, db.session, name='Tài khoản'))
 admin.add_view(AdminView(MedicineCategory, db.session, name='Danh mục thuốc'))
 admin.add_view(MedicineView(Medicine, db.session, name='Danh sách thuốc'))
 admin.add_view(MyRuleView(name="Quy định"))

@@ -10,14 +10,6 @@ from flask_login import current_user
 def index():
     return render_template('index.html')
 
-@app.route("/doctor")
-def doctor():
-    # kw = request.args.get('kw')
-    info = dao.get_user(current_user.id)
-
-    return render_template("doctor.html", search_result = info)
-
-
 @app.route("/introduce")
 def introduce():
     return render_template("introduce.html")

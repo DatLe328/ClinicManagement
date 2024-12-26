@@ -47,13 +47,14 @@
                         <a class="nav-link text-white" href="/invoices">Xem lịch sử hóa đơn</a>
                     </li>
                     {% endif %}
-                {% else %}
-                <li class="nav-item">
-                    <a class="nav-link text-white" href="/introduce">Giới thiệu</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white" href="/support">Hỗ trợ</a>
-                </li> 
+                {% endif %}
+                {% if current_user.user_role == UserRole.USER or not current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/introduce">Giới thiệu</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/support">Hỗ trợ</a>
+                    </li>
                 {% endif %}
             </ul>
 
