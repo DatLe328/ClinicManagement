@@ -1,0 +1,38 @@
+body {
+    background-color: #F2F9FF;
+    color: darkblue;
+}
+
+.header-nav {
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand img {
+    height: 40px;
+}
+
+.nav-link {
+    color: #333;
+    transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+    color: #007bff;
+}
+
+.header-contact-img i {
+    font-size: 24px;
+    color: #28a745;
+}
+
+.header-contact-detail p {
+    margin: 0;
+    line-height: 1.2;
+}
+
+.header-login {
+    font-weight: bold;
+    color: #28a745;
+}
+

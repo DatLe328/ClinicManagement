@@ -1,0 +1,76 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+<head>
+    <link href="static\css\introduce.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" rel="stylesheet"/>
+</head>
+
+<header>
+    <h1 class="text-center text-primary">Giới Thiệu Hệ Thống Healthcare</h1>
+</header>
+<div class="img-fluid" alt="Responsive image">
+    <img src="static/img/banner-3.jpg" alt="Stethoscope" class="center-image">
+</div>
+<section class="intro">
+    <h2>Chúng tôi là ai? & Chúng tôi làm gì?</h2>
+    <p>Bác sĩ cung cấp thông tin chi tiết về chuyên môn và giờ làm việc, đồng thời tạo giao diện dễ dùng để sử dụng và gửi thông báo xác nhận cho bệnh nhân.</p>
+    <p>Đồng thời, đảm bảo bảo mật thông tin cá nhân và cung cấp tùy chọn hủy hoặc đổi lịch hẹn dễ dàng sao cho thuận tiện và hài lòng của bệnh nhân.</p>
+</section>
+
+<section class="why-choose-us">
+    <h2>Tại sao chọn chúng tôi?</h2>
+    <div class="departments">
+        <div class="department">
+            <h3>Khoa Ngoại</h3>
+            <p>Cung cấp các dịch vụ phẫu thuật và điều trị các bệnh lý cần can thiệp phẫu thuật như viêm ruột thừa, gãy xương, và các vấn đề liên quan đến cơ xương khớp.</p>
+        </div>
+        <div class="department">
+            <h3>Khoa Nhi</h3>
+            <p>Đánh giá và điều trị các vấn đề sức khỏe của trẻ em từ sơ sinh đến tuổi trưởng thành, bao gồm phát hiện sớm các bệnh lý.</p>
+        </div>
+        <div class="rounded mx-auto d-block">
+            <img src="static\img\clinic-4.jpg" alt="Stethoscope" class="center-image">
+        </div>
+        <div class="department">
+            <h3>Khoa Da Liễu</h3>
+            <p>Điều trị các vấn đề liên quan đến da, bao gồm mụn trứng cá, eczema, và các bệnh lý da khác.</p>
+        </div>
+        <div class="department">
+            <h3>Khoa Tâm Thần</h3>
+            <p>Cung cấp chẩn đoán và điều trị các rối loạn tâm lý và tâm thần như trầm cảm, lo âu, và các vấn đề tâm lý khác.</p>
+        </div>
+    </div>
+</section>
+
+<section class="doctors">
+    <h2>Bác Sĩ Tài Năng Của Chúng Tôi</h2>
+    <div class="doctor-list">
+        <div class="doctor">
+            <img src="static\img\book-doc-01.jpg" alt="Dr. Lê Văn Đạt">
+            <h3>Dr. Dr. Lê Văn Đạt</h3>
+            <p>Chức vụ: Bác sĩ Nội Tổng Quát</p>
+            <p>Chuyên chẩn đoán và điều trị các bệnh lý tổng quát, từ bệnh tim mạch đến các vấn đề về tiêu hóa.</p>
+        </div>
+        <div class="doctor">
+            <img src="static\img\book-doc-04.jpg" alt="Dr. Hồ Quốc Huy">
+            <h3>Dr. Hồ Quốc Huy</h3>
+            <p>Surgery Specialist</p>
+            <p>Chuyên gia phẫu thuật, thực hiện các can thiệp y tế chính xác và chuyên sâu.</p>
+        </div>
+        <div class="doctor">
+            <img src="static\img\book-doc-03.jpg" alt="Dr. Lê Nguyễn Đức Huy">
+            <h3>Dr. Lê Nguyễn Đức Huy</h3>
+            <p>Chức vụ: Bác sĩ Ngoại Khoa</p>
+            <p>Thực hiện các ca phẫu thuật và điều trị các bệnh lý liên quan đến phẫu thuật nội soi.</p>
+        </div>
+        <div class="doctor">
+            <img src="static\img\book-doc-02.jpg" alt="Dr. Lê Minh Hoàng">
+            <h3>Dr. Lê Minh Hoàng</h3>
+            <p>Chức vụ: Bác sĩ Nhi</p>
+            <p>Chăm sóc và điều trị các vấn đề sức khỏe của trẻ em từ sơ sinh đến trưởng thành.</p>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

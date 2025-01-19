@@ -1,0 +1,100 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+    <head>
+        <link href="{{ url_for('static', filename='css/cashier.css') }}" rel="stylesheet"/>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" rel="stylesheet"/>
+    </head>
+    <h1 class=cashier>THANH TOÁN HÓA ĐƠN</h1>
+    <hr>
+
+    <form method="get" action="/cashier" class="d-flex">
+        <input class="form-control me-2" type="text" name="kw" placeholder="Mã bệnh nhân"/>
+        <button class="btn btn-primary" type="submit">Tìm</button>
+    </form>
+
+    <div class="r-content">
+        <div class="r-sub-content mb-0">
+
+            <div class="row r-title" style="font-weight: bold">
+                <p>HÓA ĐƠN</p>
+            </div>
+            <hr>
+            {% if user_bill %}
+                <div class="r-sub-content-1">
+                    <!-- Thông tin bệnh nhân -->
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <strong>Họ tên:</strong> {{ user_bill.user_name }}
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <strong>Ngày khám:</strong> {{ user_bill.date }}
+                        </div>
+                    </div>
+
+                    <!-- Thông tin chi phí -->
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-6">
+                            <strong>Tiền khám:</strong> {{ tien_kham }} VNĐ
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <strong>Tiền thuốc:</strong> {{ "{:,.0f}".format(user_bill.total_price) }} VNĐ
+                        </div>
+                    </div>
+
+                    <!-- Tổng tiền -->
+                    <hr>
+                    <div class="row text-center">
+                        <div class="col-md-12 mt-2 mb-2" style="font-weight: bold">
+                            <strong>Tổng tiền:</strong> {{ "{:,.0f}".format(user_bill.total_price + tien_kham) }} VNĐ
+                        </div>
+                    </div>
+                </div>
+
+            {% endif %}
+        </div>
+    </div>
+    {% if user_bill %}
+        <form method="post" action="/process_payment" class="text-center mt-3">
+            <input type="hidden" name="user_id" value="{{ user_bill.user_id }}">
+            <button type="submit" class="btn btn-success">Thanh toán</button>
+        </form>
+    {% endif %}
+    {#    {% if invoices %}#}
+    {#        <div class="card mt-3">#}
+    {#            <div class="card-body">#}
+    {#                <h5>Các hóa đơn đã thanh toán</h5>#}
+    {#                <table class="table">#}
+    {#                    <thead>#}
+    {#                    <tr>#}
+    {#                        <th>Mã hóa đơn</th>#}
+    {#                        <th>Ngày</th>#}
+    {#                        <th>Tổng tiền</th>#}
+    {#                    </tr>#}
+    {#                    </thead>#}
+    {#                    <tbody>#}
+    {#                    {% for invoice in invoices %}#}
+    {#                        <tr>#}
+    {#                            <td>{{ invoice[0] }}</td>#}
+    {#                            <td>{{ invoice[1] }}</td>#}
+    {#                            <td>{{ "{:,.0f}".format(invoice[2]) }} VNĐ</td>#}
+    {#                        </tr>#}
+    {#                    {% endfor %}#}
+    {#                    </tbody>#}
+    {#                </table>#}
+    {#            </div>#}
+    {#        </div>#}
+    {#    {% endif %}#}
+
+    {% if err_msg %}
+        <div class="alert alert-danger mt-3">
+            {{ err_msg }}
+        </div>
+    {% endif %}
+    {% if suc_msg %}
+        <div class="alert alert-success mt-3">
+            {{ suc_msg }}
+        </div>
+    {% endif %}
+
+{% endblock %}

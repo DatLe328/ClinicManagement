@@ -1,0 +1,66 @@
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background: #f4f4f4;
+    padding: 20px;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.intro, .why-choose-us, .doctors {
+    padding: 20px;
+}
+
+.departments, .doctor-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.department, .doctor {
+    flex: 1 1 30%;
+    margin: 10px;
+    padding: 10px;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.doctor img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 50%;
+}
+
+footer {
+    background: #333;
+    color: white;
+    padding: 10px 0;
+}
+@media (max-width: 768px) {
+    .departments, .doctor-list {
+        flex-direction: column;
+    }
+}
+.center-image {
+    width: 1100px; /* Thay đổi tùy theo yêu cầu */
+    height: 400px;
+    object-fit: cover; /* Đảm bảo hình ảnh phù hợp mà không bị méo */
+    margin: 0 auto; /* Căn giữa hình ảnh */
+    display: block;
+}
+.image-column {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column; /* Sắp xếp theo chiều dọc */
+    text-align: center; /* Canh giữa văn bản */
+}

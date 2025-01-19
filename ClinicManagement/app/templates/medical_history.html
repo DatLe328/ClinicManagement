@@ -1,0 +1,112 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+
+    <head>
+        <link href="{{ url_for('static', filename='css/MedicalHistory.css') }}" rel="stylesheet"/>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" rel="stylesheet"/>
+    </head>
+
+    <div class="container-fluid">
+        {% if current_user.is_authenticated %}
+            <div class="user">
+                <div class="content">
+                    <h1 style="font-weight: bold">LỊCH SỬ BỆNH</h1>
+                    <hr>
+                    {% if current_user.user_role != UserRole.USER %}
+                        <form method="get" action="/medical_history" class="d-flex">
+                            <input class="form-control me-2" type="text" name="kw" placeholder="Mã bệnh nhân"/>
+                            <button class="btn btn-primary" type="submit">Tìm</button>
+
+                        </form>
+                        {% if err_msg %}
+                            <div class="alert alert-danger">
+                                {{ err_msg }}
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                    <div class="history">
+                        <table class="table mt-4">
+                            <tr>
+                                <th>Mã đơn thuốc</th>
+                                <th>Mã bệnh nhân</th>
+                                <th>Tên bệnh nhân</th>
+                                <th>Triệu chứng</th>
+                                <th>Chuẩn đoán</th>
+                                <th>Ngày khám</th>
+                                <th>Đơn thuốc</th>
+                            </tr>
+                            {% for lsb in patient_prescription %}
+                                <tr>
+                                    <td>{{ lsb.prescription_id }}</td>
+                                    <td>{{ lsb.user_id }}</td>
+                                    <td>{{ lsb.full_name }}</td>
+                                    <td>{{ lsb.symptoms }}</td>
+                                    <td>{{ lsb.diagnosis }}</td>
+                                    <td>{{ lsb.date }}</td>
+                                    <td>
+                                        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                                data-bs-target="#modal-{{ lsb.prescription_id }}" data-toggle="tooltip"
+                                                data-placement="right" title="Xem chi tiết">
+                                            <i class="fa fa-eye"></i>
+                                        </button>
+                                        <div class="modal fade" id="modal-{{ lsb.prescription_id }}"
+                                             data-bs-backdrop="static"
+                                             data-bs-keyboard="false" tabindex="-1"
+                                             aria-labelledby="modalLabel-{{ lsb.prescription_id }}" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title"
+                                                            id="modalLabel-{{ lsb.prescription_id }}">Chi tiết đơn
+                                                            thuốc</h5>
+                                                        <button type="button" class="btn-close"
+                                                                data-bs-dismiss="modal"
+                                                                aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <table class="table">
+                                                            <thead>
+                                                            <tr>
+                                                                <th>Name</th>
+                                                                <th>Quantity</th>
+                                                                <th>Description</th>
+                                                                <th>Date</th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                            {% for record in all_prescriptions %}
+                                                                {% if record.prescription_id == lsb.prescription_id %}
+                                                                    <tr>
+                                                                        <td>{{ record.medicine_name }}</td>
+                                                                        <td>{{ record.quantity }}</td>
+                                                                        <td>{{ record.description }}</td>
+                                                                        <td>{{ record.date }}</td>
+                                                                    </tr>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-primary"
+                                                                data-bs-dismiss="modal">Đóng
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            </div>
+        {% else %}
+            <h1>GOOD</h1>
+        {% endif %}
+
+{% endblock %}

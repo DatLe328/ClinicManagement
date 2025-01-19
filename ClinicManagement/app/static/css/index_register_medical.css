@@ -1,0 +1,31 @@
+div.user-left {
+    border-right: solid;
+}
+
+div.user {
+    margin: 1%;
+}
+
+div.user-center {
+    border-right: solid;
+}
+
+div.content {
+    padding-top: 5%;
+}
+
+div.user-center-img {
+    width: 285px;
+    height: 370px;
+}
+
+div.content > div.user-center-img > img {
+    width: 95%;
+    height: 95%;
+}
+
+div.register_medical {
+    background-color: #e6e6e6;
+    margin-top: 2%;
+    border: solid;
+}

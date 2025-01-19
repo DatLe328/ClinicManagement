@@ -1,0 +1,257 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+
+    {% if current_user.is_authenticated and current_user.user_role.__eq__("UserRole.Doctor") %}
+        <head>
+            <link href="{{ url_for('static', filename='css/doctor.css') }}" rel="stylesheet"/>
+            <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" rel="stylesheet"/>
+        </head>
+
+        <div class="content">
+            <div class="doctor row">
+                <div class="doctor-left col-md-4 col-sm-12 text-center">
+                    <form method="post" enctype="multipart/form-data" action="/add_prescription">
+
+                        <div class="mb-3 mt-3">
+                            <div>
+                                <h4 style="font-weight:bold">Tra cứu bệnh nhân</h4>
+                                <p>
+                                    Nhập mã bệnh nhân và nhấn kiểm tra để kiểm tra xem thông tin
+                                    bệnh nhân chính xác.
+                                </p>
+                            </div>
+
+                            <div class="m-user mb-3 mt-3">
+                                <label for="u-id" class="lb-id form-label">Mã bệnh nhân:</label>
+                                <input type="text" class="form-control" placeholder="Nhập mã bệnh nhân" name="user_id"
+                                       value="{{ user_id }}">
+                                <button class="btn btn-primary" type="submit" name="action" value="search_patient">Kiểm
+                                    tra
+                                </button>
+                            </div>
+
+                            <div class="mt-3">
+                                {% if search_result %}
+                                    <h5 class="fw-bold">Thông tin bệnh nhân:</h5>
+                                    <ul class="list-group">
+                                        <!-- <li>{{ search_result }}</li> -->
+                                        <li class="list-group-item">Mã bệnh nhân:
+                                            <span class="fw-bold">{{ search_result[0].user_id }}</span>
+                                        </li>
+                                        <li class="list-group-item">Họ tên:
+                                            <span class="fw-bold">{{ search_result[0].full_name }}</span>
+                                        </li>
+                                        <li class="list-group-item">Giới tính:
+                                            {% if search_result[0].gender %}
+                                                Nam
+                                            {% else %}
+                                                Nữ
+                                            {% endif %}
+                                        </li>
+                                        <li class="list-group-item">Ngày sinh: {{ search_result[0].birth_date }}</li>
+                                    </ul>
+                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                            data-bs-target="#exampleModal">
+                                        Tiền sử bệnh lý
+                                    </button>
+
+                                    <!-- Modal -->
+                                    <div class="modal fade" id="exampleModal" tabindex="-1"
+                                         aria-labelledby="exampleModalLabel"
+                                         aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                            aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    {% if medical_history %}
+                                                        <table class="table table-striped">
+                                                            <thead>
+                                                            <tr>
+                                                                <th>#</th>
+                                                                <th>Tên bệnh</th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                            {% for record in medical_history %}
+                                                                <tr>
+                                                                    <td>{{ loop.index }}</td>
+                                                                    <td>{{ record.disease_name }}</td>
+                                                                </tr>
+                                                            {% endfor %}
+                                                            </tbody>
+                                                        </table>
+                                                    {% else %}
+                                                        <p class="text-center">Bệnh nhân chưa có tiền sử bệnh lý nào.</p>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary"
+                                                            data-bs-dismiss="modal">Close
+                                                    </button>
+                                                    <button type="button" class="btn btn-primary">Save changes</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <h5 class="fw-bold">Thông tin bệnh nhân:</h5>
+                                    <ul class="list-group">
+                                        <!-- <li>{{ search_result }}</li> -->
+                                        <li class="list-group-item">Họ tên:
+                                            <span class="fw-bold"></span>
+                                        </li>
+                                        <li class="list-group-item">Giới tính:</li>
+                                        <li class="list-group-item">Ngày sinh:</li>
+                                    </ul>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="mb-3 mt-3">
+                            <div class="mb-3 mt-3">
+                                <div>
+                                    <h4 style="font-weight:bold">Tra cứu thuốc</h4>
+                                    <p>Nếu <b>không nhập thuốc</b> thì nó sẽ là <b>tra cứu phiếu khám</b> theo mã bệnh
+                                        nhân</p>
+                                </div>
+                                <div class="m-medicine mb-3 mt-3">
+                                    <label class="form-label">Nhập thuốc:</label>
+                                    <input class="form-control" list="medicines" name="medicine" id="medicine">
+                                    <datalist id="medicines">
+                                        {% for t in medicines %}
+                                            <option value="{{ t.name }}">
+                                        {% endfor %}
+                                    </datalist>
+                                </div>
+                                <div class="m-quantity mb-2 mt-2">
+                                    <label class="form-label">Số lượng:</label>
+                                    <input type="number" min="1" value="1" class="form-control" name="so_luong_thuoc"/>
+                                </div>
+                            </div>
+                            {% if is_user_have_appointment %}
+                                <button class="bt-add btn btn-primary" type="submit" name="action"
+                                        value="add_prescription">
+                                    Thêm
+                                </button>
+                            {% endif %}
+                        </div>
+                        {% if err_msg %}
+                            <div class="alert alert-danger">
+                                {{ err_msg }}
+                            </div>
+                        {% endif %}
+                        {% if suc_msg %}
+                            <div class="alert alert-success">
+                                {{ suc_msg }}
+                            </div>
+                        {% endif %}
+                    </form>
+                </div>
+
+
+                <div class="doctor-right col-md-8 col-sm-12">
+                    <form method="post" enctype="multipart/form-data" action="/doctor_save_prescription">
+                        <div>
+                            <h2 style="font-weight: bold">PHIẾU KHÁM BỆNH</h2>
+                            <p>
+                                Vui lòng kiểm tra kỹ trước khi thêm và lưu phiếu.
+                            </p>
+                            <hr>
+                            <div class="container-fluid">
+                                {% if user_id_view %}
+                                    <div style="font-weight: bold; font-size: 25px">
+                                        Phiếu khám của bệnh nhân: <span
+                                            style="color: red">{{ user_id_view[0][1] }}</span>
+                                    </div>
+                                {% endif %}
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="mb-3 mt-3">
+                                            <div class="m-symptom">
+                                                <label for="symptom" class="form-label">Triệu chứng:</label>
+                                                {% if symptoms %}
+                                                    <input type="text" class="form-control" id="trieu_chung" placeholder="Nhập triệu chứng" name="trieu_chung" value="{{ symptoms }}">
+                                                {% else %}
+                                                    <input type="text" class="form-control" id="trieu_chung" placeholder="Nhập triệu chứng" name="trieu_chung" value="">
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6 ">
+                                        <div class="mb-3 mt-3">
+                                            <div class="m-diagnostic">
+                                                <label class="form-label">Chuẩn đoán:</label>
+                                                <select class="form-select" name="chuan_doan" id="chuan_doan">
+                                                    {% if diagnosis %}
+                                                        <option value="" selected disabled>Hiện
+                                                            tại: {{ diagnosis }}</option>
+                                                    {% else %}
+                                                        <option value="" selected disabled>Vui lòng chọn chuẩn đoán
+                                                        </option>
+                                                    {% endif %}
+                                                    {% for d in diseases %}
+                                                        <option>{{ d.name }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="medicine-form">
+                            <table class="table">
+                                <tr>
+                                    <th>Mã <br> phiếu khám</th>
+                                    <th>Mã <br> bệnh nhân</th>
+                                    <th>Thuốc</th>
+                                    <th>Đơn vị</th>
+                                    <th>Số lượng</th>
+                                    <th>Cách dùng</th>
+                                    <th></th>
+                                </tr>
+                                {% for t in medicines_in_prescription %}
+                                    <tr>
+                                        <td>{{ t.prescription_id }}</td>
+                                        <td>{{ t.user_id }}</td>
+                                        <td>{{ t.name }}</td>
+                                        <td>{{ t.unit }}</td>
+                                        <td>{{ t.quantity }}</td>
+                                        <td>{{ t.description }}</td>
+                                        <td>
+                                            <button type="submit" name="action" value="delete-{{ t.id }}"
+                                                    class="btn btn-primary">Xóa
+                                            </button>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+                        {% if is_user_have_appointment %}
+                            <button type="submit" name="action" value="save-{{ user_id }}"
+                                    class="btn btn-primary form-floating mt-3 mb-3 text-center">Lưu phiếu khám
+                            </button>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="noti-click">
+            <div class="noti-info alert alert-warning">
+                Tạo phiếu <strong>thành công &#10004</strong>
+            </div>
+        </div>
+
+
+    {% else %}
+        <h1>GOOD</h1>
+    {% endif %}
+
+{% endblock %}

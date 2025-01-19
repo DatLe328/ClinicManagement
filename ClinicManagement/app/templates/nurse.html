@@ -1,0 +1,145 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+
+    {% if current_user.is_authenticated and current_user.user_role.__eq__("UserRole.Nurse") %}
+        <head>
+            <link href="{{ url_for('static', filename='css/nurse.css') }}" rel="stylesheet"/>
+            <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" rel="stylesheet"/>
+        </head>
+
+
+        <div class="content">
+            <div class="nurse row">
+                <div class="nurse-left col-md-4 col-sm-12 text-center">
+                    <div class="nurse-left-infor">
+                        {% if err_msg %}
+                            <div class="alert alert-danger">
+                                {{ err_msg }}
+                            </div>
+                        {% endif %}
+                        {% if suc_msg %}
+                            <div class="alert alert-success">
+                                {{ suc_msg }}
+                            </div>
+                        {% endif %}
+                        <div class="table-danh-sach-kham ">
+                            <table class="table">
+                                <tr>
+                                    <th>Id</th>
+                                    <th>Tên danh sách</th>
+                                    <th>Ngày tạo</th>
+                                    {% if danh_sach_kham %}
+                                        <th></th>
+                                    {% endif %}
+                                </tr>
+                                {% if danh_sach_kham %}
+                                    {% for ds in danh_sach_kham %}
+                                        <tr>
+                                            <td>{{ ds.id }}</td>
+                                            <td>{{ ds.name }}</td>
+                                            <td>{{ ds.date }}</td>
+                                            <td>
+                                                <form method="post" enctype="multipart/form-data"
+                                                      action="/load_appointment">
+                                                    <button type="submit" class="btn btn-primary"
+                                                            name="button_value" value="{{ ds.id }}">
+                                                        <i class="fa fa-eye"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td>{{ err_msg }}</td>
+                                    </tr>
+                                {% endif %}
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="nurse-right col-md-8 col-sm-12">
+                    <div>
+                        <h2>DANH SÁCH ĐĂNG KÝ KHÁM BỆNH</h2>
+                        <hr>
+
+                    </div>
+                    <div class="schedule-form">
+                        <div class="chi-tiet-danh-sach-kham">
+                            <table class="table">
+                                <tr>
+                                    <th>Mã bệnh nhân</th>
+                                    <th>Họ tên</th>
+                                    <th>Giới tính</th>
+                                    <th>Ngày sinh</th>
+                                    <th>SĐT</th>
+                                    <th>Địa chỉ</th>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
+                                {% for us in appointment_user_list %}
+                                    <tr>
+                                        <td>{{ us[0].user_id }}</td>
+                                        <td>{{ us[0].full_name }}</td>
+                                        {% if us[0].gender == True %}
+                                            <td>Nam</td>
+                                        {% else %}
+                                            <td>Nữ</td>
+                                        {% endif %}
+                                        <td>{{ us[0].birth_date }}</td>
+                                        <td>{{ us[0].phone_number }}</td>
+                                        <td>{{ us[0].address }}</td>
+                                        <td>
+                                            {% if not us[0]['has_prescription'] %}
+                                                <form method="post" action="/delete_patient" class="delete-form">
+                                                    <input type="hidden" id="user_id_delete" name="user_id_delete"
+                                                           value="{{ us[0].user_id }}"/>
+                                                    <input type="hidden" id="date_delete" name="date_delete"
+                                                           value="{{ current_date }}"/>
+                                                    <button type="submit" class="btn btn-danger">Xóa</button>
+                                                </form>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if not us['has_prescription'] %}
+                                                <form method="post" action="/confirm_patient" class="confirm-form"
+                                                      style="display: inline;">
+                                                    <input type="hidden" id="user_id_confirm" name="user_id_confirm"
+                                                           value="{{ us[0].user_id }}"/>
+                                                    {% if current_date == today_date %}
+                                                    <input type="hidden" id="date_confirm" name="date_confirm"
+                                                           value="{{ current_date }}"/>
+                                                    <button type="submit" class="btn btn-success">Xác nhận</button>
+                                                    {% endif %}
+                                                </form>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+{#                        {% if today_date == current_date %}#}
+{#                            <div class="bt-confirm form-floating mt-3 mb-3">#}
+{#                                <form method="post" enctype="multipart/form-data"#}
+{#                                      action="/save_chi_tiet_danh_sach_kham">#}
+{#                                    <input type="hidden" id="current_date_submit" name="current_date_submit"#}
+{#                                           value="{{ current_date }}"/>#}
+{#                                    <button type="submit" class="btn btn-success">Lưu danh sách</button>#}
+{#                                </form>#}
+{#                            </div>#}
+{#                        {% endif %}#}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+    {% else %}
+        <h1>GOOD</h1>
+    {% endif %}
+
+{% endblock %}

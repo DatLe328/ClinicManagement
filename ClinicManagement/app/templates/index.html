@@ -1,0 +1,444 @@
+{% extends 'layout/base.html' %} {% block content %}
+
+    <head>
+        <link
+                href="{{ url_for('static', filename='css/index_register_medical.css') }}"
+                rel="stylesheet"
+        />
+        <link
+                href="{{ url_for('static', filename='css/index_main.css') }}"
+                rel="stylesheet"
+        />
+        <link
+                href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"
+                rel="stylesheet"
+        />
+        <style>
+            h2,
+            h3 {
+                font-weight: bold;
+                margin-bottom: 1rem;
+            }
+
+            .carousel-item img {
+                height: 500px;
+                object-fit: cover;
+            }
+
+            section {
+                background-color: #f9f9f9;
+                border-radius: 10px;
+            }
+
+            .rounded {
+                border-radius: 10px;
+            }
+
+            .btn-info {
+                background-color: #00c9a7;
+                color: white;
+                border: none;
+                transition: background-color 0.3s ease;
+            }
+
+            .btn-info:hover {
+                background-color: #009f82;
+            }
+
+            .rounded-circle {
+                border: 2px solid #00c9a7;
+                padding: 5px;
+            }
+
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f8f9fa;
+            }
+
+            /* Circle Card */
+            .circle-card {
+                width: 100px;
+                height: 100px;
+                border-radius: 50%;
+                background-color: white;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                margin: auto;
+            }
+
+            .circle-card img {
+                width: 60%;
+                height: auto;
+            }
+
+            h2 {
+                color: #333;
+            }
+
+            /* Indicators */
+            .indicator {
+                display: inline-block;
+                width: 15px;
+                height: 4px;
+                background-color: #ccc;
+                margin: 0 5px;
+                border-radius: 2px;
+            }
+
+            .indicator.active {
+                background-color: #00c9a7;
+            }
+
+            /* Responsive Adjustments */
+            @media (max-width: 768px) {
+                .circle-card {
+                    width: 80px;
+                    height: 80px;
+                }
+            }
+
+            .card {
+                border: none; /* Xóa viền mặc định */
+                border-radius: 10px; /* Bo tròn góc */
+                overflow: hidden; /* Ẩn phần thừa của ảnh */
+            }
+
+            .card-img-top {
+                object-fit: cover; /* Cắt ảnh theo khung và giữ tỷ lệ */
+                height: 200px; /* Chiều cao cố định cho ảnh */
+            }
+
+            .card-body {
+                padding: 1rem; /* Thêm padding cho nội dung */
+            }
+
+            .btn-info {
+                background-color: #00c9a7;
+                border: none;
+                transition: background-color 0.3s ease;
+            }
+
+            .btn-info:hover {
+                background-color: #009f82;
+            }
+
+            .circle-container {
+                width: 120px; /* Kích thước vòng tròn */
+                height: 120px;
+                border-radius: 50%; /* Làm tròn 100% */
+                border: 2px solid #00c9a7; /* Viền xanh */
+                overflow: hidden; /* Ẩn phần thừa */
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                background-color: #fff; /* Nền trắng */
+                margin: auto;
+            }
+
+            .circle-container img {
+                width: 100%; /* Đảm bảo ảnh vừa với khung */
+                height: 100%;
+                object-fit: cover; /* Cắt và giữ tỷ lệ ảnh */
+                border-radius: 50%; /* Đảm bảo ảnh cũng là hình tròn */
+            }
+
+            .circle-container {
+                width: 120px; /* Kích thước vòng tròn */
+                height: 120px;
+                border-radius: 50%; /* Làm tròn 100% */
+                border: 2px solid #00c9a7; /* Viền xanh */
+                overflow: hidden; /* Ẩn phần thừa */
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                background-color: #fff; /* Nền trắng */
+                margin: auto;
+            }
+
+            /* Hình ảnh bên trong vòng tròn */
+            .circle-container img {
+                width: 100%; /* Đảm bảo ảnh vừa với khung */
+                height: 100%;
+                object-fit: cover; /* Cắt và giữ tỷ lệ ảnh */
+                border-radius: 50%; /* Đảm bảo ảnh cũng là hình tròn */
+            }
+
+            .image-container {
+                text-align: center;
+                margin-top: 20px;
+            }
+
+            .additional-image {
+                max-width: 100%;
+                height: auto;
+            }
+        </style>
+    </head>
+
+    <div class="register_medical container-fluid">
+{#        {% if current_user.is_authenticated %}#}
+{#            <div class="user row">#}
+{#                <div class="user-left col-sm-3">#}
+{#                    <div class="content">#}
+{#                        <div class="user-center-img">#}
+{#                            <img#}
+{#                                    style="border-radius: 50%"#}
+{#                                    src="{{ current_user.anhDaiDien }}"#}
+{#                                    alt="{{ current_user.tenUser }}"#}
+{#                            />#}
+{#                        </div>#}
+{#                        <div class="card-body text-center">#}
+{#                            <h4 class="card-title">Mã bệnh nhân: {{ current_user.id }}</h4>#}
+{#                            <h4 class="card-title">{{ current_user.full_name }}</h4>#}
+{#                            <h4 class="card-title">SĐT: {{ current_user.phone_number }}</h4>#}
+{#                            <h4 class="card-title">Vai trò: {{ current_user.user_role.name }}</h4>#}
+{#                            <h4 class="card-title">Ngày sinh: {{ current_user.birth_date }}</h4>#}
+{#                            <h4 style="color: blue">ONLINE <i class="fas fa-toggle-on"></i></h4>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#                <div class="user-center col-sm-4">#}
+{#                    <div class="content">#}
+{#                        <strong>LƯU Ý:</strong>#}
+{#                        <p>#}
+{#                            Lịch khám có hiệu lực sau khi có xác nhận từ chính thức từ Hệ thống#}
+{#                            phòng mạch.#}
+{#                        </p>#}
+{#                        <p>#}
+{#                            Thời gian đăng ký khám <b>trực tuyến</b> sẽ bắt đầu vào lúc#}
+{#                            <b>5:00 AM</b> đến <b>9:00 AM</b> và sẽ bắt đầu khám bệnh vào lúc#}
+{#                            <b>1:00 PM</b> cùng ngày.#}
+{#                        </p>#}
+{#                        <p>#}
+{#                            Những quý khách nào <b>không thể đăng ký khám trực tuyến</b> thì có#}
+{#                            thể đến trực tiếp tại phòng mạch <b></b> của chúng tôi để#}
+{#                            <b>được hỗ trợ đăng ký khám</b>.#}
+{#                        </p>#}
+{#                        <p>#}
+{#                            Quý khách sử dụng dịch vụ đăng ký khám trực tuyến vui lòng#}
+{#                            <b>nắm rõ các lưu ý</b> để có trải nghiệm tốt nhất tại phòng khám của#}
+{#                            chúng tôi.#}
+{#                        </p>#}
+{#                        <p>#}
+{#                            Trong trường hợp khẩn cấp hoặc nghi ngờ có các triệu chứng nguy hiểm,#}
+{#                            quý khách vui lòng <b>ĐẾN TRỰC TIẾP</b> Phòng khám hoặc các trung tâm#}
+{#                            y tế gần nhất để kịp thời xử lý.#}
+{#                        </p>#}
+{#                    </div>#}
+{#                </div>#}
+{#                <div class="user-right col-sm-5">#}
+{#                    <div class="content">#}
+{#                        <h2>ĐĂNG KÝ KHÁM BỆNH</h2>#}
+{#                        <p>Quý khách vui lòng điền thông tin khám bệnh</p>#}
+{#                        <div class="medical-register">#}
+{#                            <form#}
+{#                                    method="post"#}
+{#                                    enctype="multipart/form-data"#}
+{#                                    action="user_dang_ky_kham"#}
+{#                            >#}
+{#                                <div class="form-floating mb-2 mt-2">#}
+{#                                    <input#}
+{#                                            type="text"#}
+{#                                            class="form-control"#}
+{#                                            required#}
+{#                                            id="user_dang_ky_kham"#}
+{#                                            name="user_dang_ky_kham"#}
+{#                                    />#}
+{#                                    <label for="user_dang_ky_kham">Nhập số điện thoại của bạn</label>#}
+{#                                </div>#}
+{#                                <div>#}
+{#                                    <label for="appointment_date">Ngày hẹn: </label>#}
+{#                                    <select id="appointment_date" name="appointment_date" required>#}
+{#                                        <option value="" selected disabled>Ngày hẹn</option>#}
+{#                                        {% for date in appointment_dates %}#}
+{#                                            <option value="{{ date }}">{{ date }}</option>#}
+{#                                        {% endfor %}#}
+{#                                    </select>#}
+{#                                </div>#}
+{#                                <div>#}
+{#                                    <label for="appointment_time">Giờ hẹn: </label>#}
+{#                                    <select id="appointment_time" name="appointment_time" required>#}
+{#                                        <option value="" selected disabled>Giờ hẹn</option>#}
+{#                                        {% for time in appointment_times %}#}
+{#                                            <option value="{{ time }}">{{ time }}</option>#}
+{#                                        {% endfor %}#}
+{#                                    </select>#}
+{#                                </div>#}
+{#                                <div class="form-floating mt-3 mb-3">#}
+{#                                    <input type="submit" value="Đăng ký khám" class="btn btn-info"/>#}
+{#                                </div>#}
+{#                                {% if err_msg %}#}
+{#                                    <div class="alert alert-danger">{{ err_msg }}</div>#}
+{#                                {% endif %}#}
+{#                            </form>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+
+{#        {% else %}#}
+            <div id="carouselExample" class="carousel slide" data-bs-ride="carousel">
+                <button
+                        class="carousel-control-prev"
+                        type="button"
+                        data-bs-target="#carouselExample"
+                        data-bs-slide="prev"
+                >
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button
+                        class="carousel-control-next"
+                        type="button"
+                        data-bs-target="#carouselExample"
+                        data-bs-slide="next"
+                >
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+            </div>
+
+            <!-- Tìm kiếm bác sĩ -->
+            <section class="text-center py-5">
+                <h2>TÌM KIẾM BÁC SĨ, ĐẶT LỊCH HẸN</h2>
+                <p>
+                    Hãy đặt lịch để được bác sĩ thăm khám và theo dõi bệnh tình một cách tốt
+                    nhất.
+                </p>
+                <div class="d-flex justify-content-center align-items-center">
+                    <button class="btn btn-success" type="button">
+                        {% if not current_user.is_authenticated %}
+    	                    <a class="nav-link text-white" href="/login">Đăng ký ngay</a>
+                        {% else %}
+                            <a class="nav-link text-white" href="/appointment_register">Đăng ký ngay</a>
+                        {% endif %}
+                    </button>
+                </div>
+                <div class="image-container">
+                    <img
+                            src="static\img\search-bg.png"
+                            alt="Additional image"
+                            class="additional-image"
+                    />
+                </div>
+            </section>
+
+            <!-- Danh mục dịch vụ -->
+            <section class="container py-5">
+                <h3 class="text-center mb-4">DỊCH VỤ TẠI PHÒNG KHÁM</h3>
+                <div class="row g-4 text-center">
+                    <!-- Cột 1 -->
+                    <div class="col-md-4">
+                        <div class="card h-100 shadow-sm">
+                            <img
+                                    src="static/img/blog-wrap-03.jpg"
+                                    class="card-img-top img-fluid"
+                                    alt="Dịch vụ 1"
+                            />
+                            <div class="card-body">
+                                <h5 class="card-title">Khám sức khỏe tổng quát</h5>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Cột 2 -->
+                    <div class="col-md-4">
+                        <div class="card h-100 shadow-sm">
+                            <img
+                                    src="static/img/img-pharmacy1.jpg"
+                                    class="card-img-top img-fluid"
+                                    alt="Dịch vụ 2"
+                            />
+                            <div class="card-body">
+                                <h5 class="card-title">Tư vấn</h5>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Cột 3 -->
+                    <div class="col-md-4">
+                        <div class="card h-100 shadow-sm">
+                            <img
+                                    src="static/img/lab-image.jpg"
+                                    class="card-img-top img-fluid"
+                                    alt="Dịch vụ 3"
+                            />
+                            <div class="card-body">
+                                <h5 class="card-title">Xét nghiệm</h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- Chuyên khoa -->
+            <section class="container py-5 text-center">
+                <h3>PHÒNG KHÁM VÀ CHUYÊN KHOA</h3>
+                <div class="row justify-content-center">
+                    <div class="col-6 col-md-2">
+                        <div class="circle-container">
+                            <img src="static/img/timmach.png" alt="Khoa"/>
+                        </div>
+                        <p>Tim mạch</p>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <div class="circle-container">
+                            <img src="static/img/nhasi.jpg" alt="Khoa"/>
+                        </div>
+                        <p>Nha sĩ</p>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <div class="circle-container">
+                            <img src="static/img/thankinhhoc.jpg" alt="Khoa"/>
+                        </div>
+                        <p>Thần kinh học</p>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <div class="circle-container">
+                            <img src="static/img/tietnieu.jpg" alt="Khoa"/>
+                        </div>
+                        <p>Tiết niệu</p>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <div class="circle-container">
+                            <img src="static/img/xuong.jpg" alt="Khoa"/>
+                        </div>
+                        <p>Chỉnh hình</p>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <div class="circle-container">
+                            <img src="static/img/mat.jpg" alt="Khoa"/>
+                        </div>
+                        <p>Mắt</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PHẦN TIẾP THEO: LỢI ÍCH ĐẶT LỊCH -->
+            <section class="py-5 text-center bg-white">
+                <div class="container">
+                    <h3 class="fw-bold">ĐẶT LỊCH KHÁM BỆNH CỦA BẠN</h3>
+                    <p class="mb-4 text-dark">
+                        Những lợi ích khi đặt lịch khám qua website của chúng tôi.
+                    </p>
+                    <div class="row">
+                        <div class="col-md-6 text-start">
+                            <h5 class="text-danger">1. Tiết kiệm thời gian</h5>
+                            <p class="text-dark">
+                                Đặt lịch trực tuyến giúp bạn dễ dàng chọn thời gian phù hợp mà không
+                                cần đến trực tiếp cơ sở y tế.
+                            </p>
+                        </div>
+                        <div class="col-md-6 text-start">
+                            <h5 class="text-danger">2. Dịch vụ chuyên nghiệp</h5>
+                            <p class="text-dark">
+                                Website cung cấp nền tảng thuận tiện giúp bạn kiểm tra thông tin và
+                                đặt lịch khám bệnh nhanh chóng.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+{#        {% endif %}#}
+    </div>
+
+{% endblock %}

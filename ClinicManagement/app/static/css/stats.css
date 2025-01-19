@@ -1,0 +1,13 @@
+h2.statTitle {
+    color: black;
+    text-align: center;
+}
+
+div.stats {
+    border-style: solid;
+    margin: auto 0;
+}
+
+div.stats-right {
+ margin: auto 0;
+}

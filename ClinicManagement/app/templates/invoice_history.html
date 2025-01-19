@@ -1,0 +1,51 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+    <head>
+        <link href="{{ url_for('static', filename='css/MedicalHistory.css') }}" rel="stylesheet"/>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" rel="stylesheet"/>
+    </head>
+    <div class="container-fluid">
+        <div class="user">
+            <div class="content">
+            <h1 style="font-weight: bold">Danh Sách Hóa Đơn</h1>
+            <hr>
+
+            <form method="get" action="/invoices" class="d-flex">
+                <input class="form-control me-2" type="text" name="user_id" placeholder="Mã bệnh nhân"/>
+                <button class="btn btn-primary" type="submit">Tìm</button>
+            </form>
+
+            {% if err_msg %}
+                <div class="alert alert-danger mt-3">
+                    {{ err_msg }}
+                </div>
+            {% endif %}
+            <div class="history">
+                <table class="table mt-4">
+                    <thead>
+                    <tr>
+                        <th>Mã hóa đơn</th>
+                        <th>Mã bệnh nhân</th>
+                        <th>Ngày</th>
+                        <th>Số tiền</th>
+                        <th>Bệnh nhân</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for invoice in invoices %}
+                        <tr>
+                            <td>{{ invoice.invoice_id }}</td>
+                            <td>{{ invoice.user_id }}</td>
+                            <td>{{ invoice.date }}</td>
+                            <td>{{ "{:,.0f}".format(invoice.total_amount) }}</td>
+                            <td>{{ invoice.user_name }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

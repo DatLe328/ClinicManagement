@@ -1,0 +1,30 @@
+{% extends 'admin/master.html' %}
+
+{% block body %}
+<form method="post" enctype="multipart/form-data">
+    <div class="quy_dinh_tien_kham">
+        <div class="mb-3 mt-3">
+            <label for="tien_kham" class="form-label">Tiền khám:
+                (Số tiền khám hiện tại: {{ "{:,.0f}".format(quy_dinh["tien_kham"]) }} VNĐ)</label>
+            <input type="text" class="form-control" required id="tien_kham"
+                   placeholder="Nhập số tiền khám bạn muốn thay đổi"
+                   name="tien_kham">
+        </div>
+    </div>
+    <div class="quy_dinh_so_benh_nhan">
+        <div class="mb-3 mt-3">
+            <label for="so_benh_nhan" class="form-label">Số lượng bệnh nhân: (Số bệnh nhân tối đa hiện tại: {{quy_dinh["so_benh_nhan"] }})</label>
+            <input type="text" class="form-control" required id="so_benh_nhan"
+                   placeholder="Nhập số lượng bệnh nhân bạn muốn thay đổi"
+                   name="so_benh_nhan">
+        </div>
+
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+{% if err_msg %}
+<div class="alert alert-danger">
+    {{ err_msg }}
+</div>
+{% endif %}
+{% endblock %}

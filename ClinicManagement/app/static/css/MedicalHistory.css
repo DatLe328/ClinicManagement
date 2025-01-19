@@ -1,0 +1,37 @@
+div.user-left {
+    border-right: solid;
+}
+
+div.user {
+    margin: 1%;
+    text-align: center;
+    border: solid;
+}
+
+div.content {
+    padding-top: 5%;
+}
+
+div.user-left-img {
+    width: 285px;
+    height: 370px;
+}
+
+div.content > div.user-left-img > img {
+    width: 95%;
+    height: 95%;
+}
+
+div.content > h1 {
+    text-align: center;
+}
+
+div.history {
+
+    height: 400px;
+    overflow: auto;
+}
+
+div.history > table.table {
+
+}

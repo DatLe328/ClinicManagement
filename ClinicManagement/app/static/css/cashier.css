@@ -1,0 +1,54 @@
+h1.cashier {
+    text-align: center;
+    color: black;
+    margin: 1%;
+}
+
+div.receipt-form {
+    margin-top: 1%;
+    border: solid;
+    text-align: center;
+}
+
+div.r-sub-content {
+    margin: 1%;
+    height: 325px;
+    border: solid;
+}
+
+div.r-title > p {
+    font-size: 200%;
+    text-align: center;
+    color: red;
+    margin: 0;
+}
+
+div.r-sub-content-1 {
+    height: 210px;
+}
+
+
+div.r-sub-content-1 > div.row {
+    margin: 1%;
+    height: 33%;
+}
+
+div.r-sub-content-1 > div.row > div {
+    font-size: 20px;
+}
+
+form.thanh_toan {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+div.thanh_toan_1 {
+    width: 70%;
+    margin-right: 3%;
+}
+
+div.receipt-table {
+    height: 400px;
+    overflow: auto;
+}

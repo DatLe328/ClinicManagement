@@ -1,0 +1,78 @@
+{% extends 'admin/master.html' %}
+
+{% block body %}
+
+<head>
+    <link href="{{ url_for('static', filename='css/stats.css') }}" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" rel="stylesheet"/>
+</head>
+
+<h2 class="statTitle">THỐNG KÊ - BÁO CÁO THEO DOANH THU</h2>
+
+<div class="stats row">
+    <div style="height: 500px; overflow: auto" class="stats-left col-md-5 col-sm-12">
+        <table class="table">
+            <tr>
+                <th>Ngày</th>
+                <th>Số lượt khám</th>
+                <th>Doanh thu</th>
+            </tr>
+
+            {% for sR in statsRevenue %}
+            <tr>
+                <td>{{ sR[0] }}</td>
+                <td>{{ sR[1] }}</td>
+                <td>{{ "{:,.0f}".format(sR[2]) }} VNĐ</td>
+            </tr>
+            {% endfor %}
+
+        </table>
+        <table class="table">
+            <tr>
+                <th>Tổng doanh thu</th>
+                 <th></th>
+                 <th></th>
+                 <th></th>
+                 <th></th>
+                <th id="sumOfRevenue"></th>
+            </tr>
+
+        </table>
+
+    </div>
+    <div class="stats-right col-md-7 col-sm-12">
+        <form>
+            <div class="form-group">
+                <h4 class = "text-center" style = "margin-bottom: 3%">Lọc dữ liệu theo tháng</h4>
+                <input type="month" placeholder="Nhập tháng" name="month" class="form-control"/>
+            </div>
+
+            <div>
+                <input type="submit" value="Lọc dữ liệu" class="btn btn-info"/>
+            </div>
+        </form>
+        <canvas id="revenueStats"></canvas>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/my-chart.js') }}"></script>
+<script>
+let data = [], labels=[];
+
+  {% for sR in statsRevenue %}
+    data.push({{ sR[2] }})
+    labels.push('{{ sR[0] }}')
+  {% endfor %}
+
+  window.onload = function() {
+    drawRevenueStats(labels, data)
+  }
+  var sum = 0;
+  for (var i = 0; i < data.length; i++) {
+    sum += data[i];
+  }
+  document.getElementById("sumOfRevenue").innerHTML = new Intl.NumberFormat('vi-VN').format(sum) + " VNĐ";
+
+</script>
+{% endblock %}

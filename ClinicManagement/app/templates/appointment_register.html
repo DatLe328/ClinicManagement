@@ -1,0 +1,134 @@
+{% extends 'layout/base.html' %} {% block content %}
+    <head>
+        <link
+                href="{{ url_for('static', filename='css/index_register_medical.css') }}"
+                rel="stylesheet"
+        />
+        <link
+                href="{{ url_for('static', filename='css/index_main.css') }}"
+                rel="stylesheet"
+        />
+        <link
+                href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"
+                rel="stylesheet"
+        />
+        <style>
+            h2,
+            h3 {
+                font-weight: bold;
+                margin-bottom: 1rem;
+            }
+
+            .carousel-item img {
+                height: 500px;
+                object-fit: cover;
+            }
+
+            section {
+                background-color: #f9f9f9;
+                border-radius: 10px;
+            }
+
+            .btn-info {
+                background-color: #00c9a7;
+                color: white;
+                border: none;
+                transition: background-color 0.3s ease;
+            }
+
+            .btn-info:hover {
+                background-color: #009f82;
+            }
+
+
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f8f9fa;
+            }
+
+            h2 {
+                color: #333;
+            }
+
+        </style>
+    </head>
+    <div class="container-fluid mt-5">
+        <div class="row border">
+            <div class="col-sm-3 border border-success p-6">
+                <div class="content">
+                    <strong>LƯU Ý:</strong>
+                    <p>
+                        Quý khách có thể đăng ký các khung giờ khám trong tuần
+                        bắt đầu từ <b>8:00</b> cho đến <b>16:00</b> cùng ngày.
+                    </p>
+                    <p>
+                        Những quý khách nào <b>không thể đăng ký khám trực tuyến</b> thì có
+                        thể đến trực tiếp tại phòng mạch <b></b> của chúng tôi để
+                        <b>được hỗ trợ đăng ký khám</b>.
+                    </p>
+                    <p>
+                        Quý khách sử dụng dịch vụ đăng ký khám trực tuyến vui lòng
+                        <b>nắm rõ các lưu ý</b> để có trải nghiệm tốt nhất tại phòng khám của
+                        chúng tôi.
+                    </p>
+                    <p>
+                        Trong trường hợp khẩn cấp hoặc nghi ngờ có các triệu chứng nguy hiểm,
+                        quý khách vui lòng <b>ĐẾN TRỰC TIẾP</b> Phòng khám hoặc các trung tâm
+                        y tế gần nhất để kịp thời xử lý.
+                    </p>
+                </div>
+            </div>
+            <div class="col-sm-3 border border-success p-6">
+                <div class="content">
+                    <h2>ĐĂNG KÝ KHÁM BỆNH</h2>
+                    <p>Quý khách vui lòng điền thông tin khám bệnh</p>
+                    <div class="medical-register">
+                        <form
+                                method="post"
+                                enctype="multipart/form-data"
+                                action="user_dang_ky_kham"
+                        >
+                            <div class="form-floating mb-2 mt-2">
+                                <input
+                                        type="text"
+                                        class="form-control"
+                                        required
+                                        id="user_dang_ky_kham"
+                                        name="user_dang_ky_kham"
+                                />
+                                <label for="user_dang_ky_kham">Nhập số điện thoại của bạn</label>
+                            </div>
+                            <div>
+                                <label for="appointment_date">Ngày hẹn: </label>
+                                <select id="appointment_date" name="appointment_date" required>
+                                    <option value="" selected disabled>Ngày hẹn</option>
+                                    {% for date in appointment_dates %}
+                                        <option value="{{ date }}">{{ date }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <label for="appointment_time">Giờ hẹn: </label>
+                                <select id="appointment_time" name="appointment_time" required>
+                                    <option value="" selected disabled>Giờ hẹn</option>
+                                    {% for time in appointment_times %}
+                                        <option value="{{ time }}">{{ time }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-floating mt-3 mb-3">
+                                <input type="submit" value="Đăng ký khám" class="btn btn-info"/>
+                            </div>
+                            {% if err_msg %}
+                                <div class="alert alert-danger">{{ err_msg }}</div>
+                            {% endif %}
+                            {% if suc_msg %}
+                                <div class="alert alert-success">{{ suc_msg }}</div>
+                            {% endif %}
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

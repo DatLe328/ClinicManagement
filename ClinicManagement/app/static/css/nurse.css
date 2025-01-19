@@ -1,0 +1,87 @@
+div.content {
+    margin-top: 2%
+}
+
+div.sub-content {
+    display: flex;
+}
+
+div.nurse {
+    text-align: center;
+    border: solid;
+}
+
+div.nurse-left {
+    padding: 2%;
+    border-right: solid;
+}
+
+div.nurse-left img {
+    margin-top: 10%;
+    border-radius: 50%;
+    width: 60%;
+}
+
+div.nurse-left-infor {
+    margin: 2%;
+    padding: 1%;
+    background-color: #ffffff;
+    border-radius: 5%;
+
+}
+
+div.nurse-left-infor > h4 {
+   margin: 5%;
+}
+
+div.nurse-left-infor > h4:first-child {
+   font-size: 30px;
+   font-weight: bold;
+}
+
+div.nurse-right {
+    padding: 2%;
+}
+
+div.nurse-right > canvas{
+    display: block;
+    margin: 0 10%;
+}
+
+div.medical-date {
+    display: flex;
+    align-items: center;
+}
+
+div.medical-date-1 {
+    width: 48%;
+}
+
+div.medical-date-2 {
+    width: 48%;
+}
+
+div.chi-tiet-danh-sach-kham {
+    overflow: auto;
+    height: 380px;
+}
+
+div.confirm-info {
+    position: absolute;
+    top: 88%;
+    right: 8%;
+}
+
+.confirm-info {
+    display: none;
+}
+
+div.user-center-img > img {
+    margin-top: 0;
+    margin-bottom: 20%;
+}
+
+div.table-danh-sach-kham {
+    height: 340px;
+    overflow: auto;
+}

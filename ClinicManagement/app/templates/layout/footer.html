@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Footer Healthcare</title>
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/footer.css') }}" rel="stylesheet"/>
+</head>
+<body>
+    <!-- Footer -->
+    <footer class="mt-5">
+        <div class="container" style="max-width: 1200px; margin: auto;">
+            <div style="display: flex; justify-content: space-between; flex-wrap: wrap;">
+                <!-- Logo và Mô tả -->
+                <div style="flex: 1; min-width: 250px; margin-bottom: 1rem;">
+                    <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                        <img src="static/img/icon.png" style="width: 40px;" alt="Logo">
+                        <span style="margin-left: 10px; font-size: 1.2rem; font-weight: bold;">HEALTH<span style="color: #ddd;">CARE</span></span>
+                    </div>
+                    <p>Điều quan trọng là phải theo dõi và chăm sóc bệnh nhân một cách tận tình và hiệu quả.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="bi bi-facebook"></i></a>
+                        <a href="#"><i class="bi bi-twitter"></i></a>
+                        <a href="#"><i class="bi bi-linkedin"></i></a>
+                        <a href="#"><i class="bi bi-instagram"></i></a>
+                    </div>
+                </div>
+
+                <!-- Danh Mục -->
+                <div style="flex: 1; min-width: 150px; margin-bottom: 1rem;">
+                    <h5>DANH MỤC</h5>
+                    <ul style="list-style: none; padding-left: 0;">
+                        <li>» <a href="#">Giới thiệu</a></li>
+                        <li>» <a href="#">Tìm kiếm bác sĩ</a></li>
+                        <li>» <a href="#">Danh mục blog</a></li>
+                    </ul>
+                </div>
+
+                <!-- Về Chúng Tôi -->
+                <div style="flex: 1; min-width: 150px; margin-bottom: 1rem;">
+                    <h5>VỀ CHÚNG TÔI</h5>
+                    <ul style="list-style: none; padding-left: 0;">
+                        <li>» <a href="/support">Hỗ trợ</a></li>
+                    </ul>
+                </div>
+
+                <!-- Liên Hệ -->
+                <div style="flex: 1; min-width: 250px; margin-bottom: 1rem;">
+                    <h5>LIÊN HỆ VỚI CHÚNG TÔI</h5>
+                    <p><i class="bi bi-geo-alt-fill"></i> 720A Điện Biên Phủ, Vinhomes Tân Cảng, Bình Thạnh, Hồ Chí Minh </p>
+                    <p><i class="bi bi-telephone-fill"></i> +84 35 4477 027</p>
+                    <p><i class="bi bi-envelope-fill"></i> healthcare@gmail.com</p>
+                </div>
+            </div>
+
+            <!-- Bản quyền -->
+            <div class="border-top" style="text-align: center; padding-top: 1rem; margin-top: 1rem;">
+                <p>&copy; 2024 Mọi quyền được bảo lưu.</p>
+                <a href="#">Điều khoản và Điều kiện</a> |
+                <a href="#">Chính sách bảo mật</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
