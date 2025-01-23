@@ -5,11 +5,13 @@ from app import app, db
 import hashlib
 import cloudinary.uploader
 from flask_login import current_user
-from sqlalchemy import func
+from sqlalchemy import func, cast, Date
 from sqlalchemy.sql.functions import user
 
 # ========================== TEST ZONE ========================== #
-def load_disease_history(user_id):
+
+# ================================================================ #
+def get_disease_history(user_id):
     try:
         query = db.session.query(
             User.id.label('user_id'),
@@ -157,7 +159,6 @@ def update_medicine_quantity_in_prescription(medicine_id, prescription_id, new_q
         db.session.rollback()
         print(f"Error updating medicine quantity: {e}")
 
-# ================================================================ #
 def get_email_by_user_id(user_id):
     user = User.query.filter_by(id=user_id).first()
     if user:
@@ -183,28 +184,6 @@ def update_user(user_id=None, full_name=None, phone_number=None, address=None, a
         db.session.rollback()
         print(f"Error updating user details: {e}")
         return False
-
-
-def update_thuoc_description(thuoc_id, description):
-    try:
-        medicine = Medicine.query.get(thuoc_id)
-        if medicine:
-            medicine.description = description
-            db.session.commit()
-    except Exception as e:
-        print(f"Error in update_thuoc_description: {e}")
-        db.session.rollback()
-
-
-def delete_thuoc(thuoc_id):
-    try:
-        medicine = Medicine.query.get(thuoc_id)
-        if medicine:
-            db.session.delete(medicine)
-            db.session.commit()
-    except Exception as e:
-        print(f"Error in delete_thuoc: {e}")
-        db.session.rollback()
 
 
 def load_prescription_data(user_id=None):
@@ -259,20 +238,6 @@ def add_user(full_name, username, password, birth_date, gender, phone_number, ad
     db.session.commit()
 
 
-def get_user_by_username(username):
-    return User.query.filter_by(username=username).first()
-
-
-def load_diseases():
-    return Disease.query.all()
-
-
-def load_categories():
-    return MedicineCategory.query.all()
-
-
-def load_users():
-    return User.query.all()
 
 
 def get_user_by_phone(phone_number=None):
@@ -398,7 +363,7 @@ def payment(bill_id):
         db.session.commit()
 
 
-def load_hoa_don_by_phieu_kham_id(phieu_kham_id=None):
+def get_invoice_by_id(phieu_kham_id=None):
     query = db.session.query(User.full_name, Invoice.date, Invoice.total_amount) \
         .join(Invoice, Invoice.user_id.__eq__(User.id)) \
         .join(Prescription, Prescription.user_id.__eq__(User.id))
@@ -413,18 +378,6 @@ def load_hoa_don_by_phieu_kham_id(phieu_kham_id=None):
     return query.group_by(User.full_name, Invoice.date, Invoice.total_amount).all()
 
 
-def load_hoa_don():
-    query = db.session.query(Invoice.id, Prescription.id, User.full_name, Invoice.date, Invoice.total_amount) \
-        .join(Invoice, Invoice.user_id.__eq__(User.id)) \
-        .join(Prescription, Prescription.user_id.__eq__(User.id))
-
-    today = datetime.now()
-    todayString = str(today)[0:10]
-    query = query.filter(Invoice.date.__eq__(todayString))
-    query = query.filter(Prescription.date.__eq__(todayString))
-
-    return query.group_by(Invoice.id, Prescription.id, User.full_name, Invoice.date, Invoice.total_amount).order_by(
-        Invoice.id).all()
 
 
 # ====================================================================================
@@ -475,8 +428,20 @@ def create_appointment_detail(appointment_id, user_id, appointment_time=None):
 def get_appointment(appointment_id=None):
     query = db.session.query(AppointmentList.id, AppointmentList.name, AppointmentList.date)
     if appointment_id:
-        query = query.filter(AppointmentList.id.__eq__(appointment_id))
-    return query.all()
+        query = query.filter(AppointmentList.id == appointment_id)
+    
+    results = query.all()
+
+    appointments = [
+        {
+            "id": row.id,
+            "name": row.name,
+            "date": row.date
+        }
+        for row in results
+    ]
+
+    return appointments
 
 def get_appointment_today():
     query = db.session.query(
@@ -501,7 +466,7 @@ def get_appointment_details(appointment_detail_id=None):
     return query.all()
 
 
-def get_user(user_id=None, phone_number=None):
+def get_user(user_id=None, user_name=None, phone_number=None):
     query = db.session.query(
         User.id, 
         User.full_name,
@@ -514,6 +479,8 @@ def get_user(user_id=None, phone_number=None):
         query = query.filter(User.id == user_id)
     if phone_number:
         query = query.filter(User.phone_number.__eq__(phone_number))
+    if user_name:
+        query = query.filter(User.username.__eq__(user_name))
     results = query.all()
     formatted_results = [
         {
@@ -590,13 +557,13 @@ def get_medicines(ten_thuoc=None):
     return query.all()
 
 
-def save_chi_tiet_phieu_kham(so_luong_thuoc=None, thuoc_id=None, phieu_kham_id=None):
+def save_prescription_detail(so_luong_thuoc=None, thuoc_id=None, phieu_kham_id=None):
     ctpk = PrescriptionDetail(quantity=so_luong_thuoc, medicine_id=thuoc_id, prescription_id=phieu_kham_id)
     db.session.add(ctpk)
     db.session.commit()
 
 
-def update_phieu_kham(phieu_kham_id=None, trieu_chung=None, chuan_doan=None):
+def update_prescription(phieu_kham_id=None, trieu_chung=None, chuan_doan=None):
     phieu_kham = Prescription.query.filter_by(id=phieu_kham_id).first()
     phieu_kham.symptoms = trieu_chung
     phieu_kham.diagnosis = chuan_doan
@@ -604,7 +571,7 @@ def update_phieu_kham(phieu_kham_id=None, trieu_chung=None, chuan_doan=None):
     db.session.commit()
 
 
-def load_phieu_kham_id_today_by_phieu_kham_id(phieu_kham_id=None):
+def get_prescription_tody_by_id(phieu_kham_id=None):
     query = db.session.query(Prescription.id)
     today = datetime.now()
     todayString = str(today)[0:10]
@@ -615,7 +582,7 @@ def load_phieu_kham_id_today_by_phieu_kham_id(phieu_kham_id=None):
     return query.all()
 
 
-def load_thuoc_in_chi_tiet_phieu_kham_today(user_id=None):
+def get_medicine_in_prescription_detail(user_id=None):
     if user_id == None:
         return []
     query = db.session.query(Medicine.id, Medicine.name, Medicine.unit, PrescriptionDetail.quantity,
@@ -658,8 +625,8 @@ def add_medical_history_detail(medical_history_id=None, disease_id=None):
     db.session.commit()
 
 
-def load_benh_id_by_ten_benh(ten_benh=None):
-    query = db.session.query(Disease.id)
+def get_disease(ten_benh=None):
+    query = db.session.query(Disease)
 
     if ten_benh:
         query = query.filter(Disease.name.__eq__(ten_benh))
@@ -667,7 +634,7 @@ def load_benh_id_by_ten_benh(ten_benh=None):
     return query.all()
 
 
-def load_lich_su_benh_id_by_phieu_kham_id(phieu_kham_id=None):
+def get_medical_history_by_prescription_id(phieu_kham_id=None):
     query = db.session.query(MedicalHistory.id) \
         .join(User, User.id.__eq__(MedicalHistory.user_id)) \
         .join(Prescription, Prescription.user_id.__eq__(User.id))
@@ -679,7 +646,7 @@ def load_lich_su_benh_id_by_phieu_kham_id(phieu_kham_id=None):
 
 
 # ====================================================================================
-def get_user_prescriptions(user_id=None):
+def get_user_prescriptions(user_id=None, date=None):
     try:
         query = db.session.query(
             User.id.label('user_id'),
@@ -693,6 +660,9 @@ def get_user_prescriptions(user_id=None):
 
         if user_id:
             query = query.filter(User.id == user_id)
+
+        if date:
+            query = query.filter(cast(Prescription.date, Date) == date)
 
         query = query.distinct(Prescription.id).order_by(Prescription.date.desc(), Prescription.id)
         results = query.all()

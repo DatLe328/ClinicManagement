@@ -104,7 +104,7 @@
                                             {% endif %}
                                         </td>
                                         <td>
-                                            {% if not us['has_prescription'] %}
+                                            {% if not us[0]['has_prescription'] %}
                                                 <form method="post" action="/confirm_patient" class="confirm-form"
                                                       style="display: inline;">
                                                     <input type="hidden" id="user_id_confirm" name="user_id_confirm"

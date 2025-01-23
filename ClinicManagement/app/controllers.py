@@ -104,7 +104,7 @@ def register_process():
         gender = request.form.get('sex')
         avatar = request.files.get('avatar')
 
-        existing_user = dao.get_user_by_username(username=username)
+        existing_user = dao.get_user(user_name=username)
         if existing_user:
             err_msg = "Tên đăng nhập đã tồn tại. Vui lòng sử dụng tên khác."
         elif password != confirm:
@@ -255,6 +255,24 @@ def user_dang_ky_kham():
 # - Có thể xác nhận toàn bộ bệnh nhân trong ngày (optional)
 
 
+@app.route("/nurse")
+def nurse_process():
+    current_date = datetime.now().strftime('%Y-%m-%d')
+    appointment = dao.get_appointment_today()
+    user_list = []
+    if appointment:
+        appointment_details = dao.get_appointment_details(appointment[0][0])
+        for i in appointment_details:
+            user = dao.get_user(i.user_id)
+            user[0].update({'has_prescription': False})
+            if dao.get_user_prescriptions(user_id=user[0]['user_id'], date=current_date):
+                user[0].update({'has_prescription': True})
+            user_list.append(user)
+
+    print(user_list)
+    return render_template("nurse.html", current_date=current_date, appointment_user_list=user_list)
+
+
 @app.route('/confirm_patient', methods=['POST'])
 def confirm_patient_process():
     err_msg = ''
@@ -272,15 +290,14 @@ def confirm_patient_process():
                 dao.create_prescription(user_id=user_id)
                 suc_msg = f"Xác nhận thành công cho bệnh nhân ID {user_id} vào ngày {date}."
 
-                from send import send_email
-                email = dao.get_email_by_user_id(user_id=user_id)
-                subject = "Thông báo tạo phiếu khám"
-                content = f"Xin chào,\n\nPhiếu khám cho user ID {user_id} đã được tạo thành công."
-                send_email(email, subject, content)
+                # from send import send_email
+                # email = dao.get_email_by_user_id(user_id=user_id)
+                # subject = "Thông báo tạo phiếu khám"
+                # content = f"Xin chào,\n\nPhiếu khám cho user ID {user_id} đã được tạo thành công."
+                # send_email(email, subject, content)
 
     except Exception as e:
         err_msg = f"Đã xảy ra lỗi: {e}"
-
     return render_template("nurse.html", err_msg=err_msg, suc_msg=suc_msg, current_date=date)
 
 
@@ -301,10 +318,10 @@ def delete_patient_process():
             err_msg = "Bệnh nhân đã có phiếu khám, không thể xóa."
         else:
             if dao.delete_appointment_detail_by_user_and_date(user_id=user_id, date=date):
-                # if dao.delete_appointment_list_if_empty(appointment_list_id):
-                #     suc_msg = "Danh sách khám đã bị xóa vì không còn bệnh nhân."
-                # else:
-                suc_msg = "Đã xóa chi tiết phiếu khám thành công."
+                if dao.delete_appointment_list_if_empty(appointment_list_id):
+                    suc_msg = "Danh sách khám đã bị xóa vì không còn bệnh nhân."
+                else:
+                    suc_msg = "Đã xóa chi tiết phiếu khám thành công."
             else:
                 err_msg = "Không tìm thấy bệnh nhân trong danh sách khám."
 
@@ -312,6 +329,8 @@ def delete_patient_process():
         err_msg = f"Đã xảy ra lỗi: {e}"
 
     return render_template("nurse.html", err_msg=err_msg, suc_msg=suc_msg, current_date=date)
+
+
 @app.route("/load_appointment", methods=['GET', 'POST'])
 def load_appointment_process():
     err_msg = ''
@@ -319,10 +338,17 @@ def load_appointment_process():
     current_date = datetime.now().strftime('%Y-%m-%d')
     try:
         appointment_id = request.form.get('button_value')
+        appointment_in_view = dao.get_appointment(appointment_id=appointment_id)
+        print(appointment_in_view)
         if appointment_id:
             appointment_details = dao.get_appointment_details(appointment_id)
             for i in appointment_details:
                 user = dao.get_user(i.user_id)
+                user[0].update({'has_prescription': False})
+                if appointment_in_view[0]['date'] < datetime.now().date():
+                    user[0].update({'has_prescription': True})
+                if dao.get_user_prescriptions(user_id=user[0]['user_id'], date=appointment_in_view[0]['date']):
+                    user[0].update({'has_prescription': True})
                 user_list.append(user)
             if not user_list:
                 err_msg = "Không tìm thấy bệnh nhân nào thuộc danh sách"
@@ -409,13 +435,11 @@ def add_prescription_process():
     global ma_phieu_kham_today, user_id_in_phieu_kham
     ma_phieu_kham_today = None
     user_id_in_phieu_kham = None
-    # session['ma_phieu_kham_today'] = None
-    # session['user_id_in_phieu_kham'] = None
 
     if not user_id:
         err_msg = "Không tồn tại bệnh nhân hoặc bệnh nhân chưa đăng ký khám"
         return render_template("doctor.html", err_msg=err_msg, user_id=user_id)
-    medical_history = dao.load_disease_history(user_id=user_id)
+    medical_history = dao.get_disease_history(user_id=user_id)
     if action == "search_patient":
         user_prescriptions = dao.get_prescriptions_for_today(user_id=user_id)
         symptoms = ""
@@ -424,8 +448,6 @@ def add_prescription_process():
             current_prescription = user_prescriptions[0]
             ma_phieu_kham_today = current_prescription['id']
             user_id_in_phieu_kham = current_prescription['user_id']
-            # session['ma_phieu_kham_today'] = current_prescription['id']
-            # session['user_id_in_phieu_kham'] = current_prescription['user_id']
             symptoms = user_prescriptions[0]['symptoms']
             diagnosis = user_prescriptions[0]['diagnosis']
         else:
@@ -447,8 +469,6 @@ def add_prescription_process():
     current_prescription = user_prescriptions[0]
     ma_phieu_kham_today = current_prescription['id']
     user_id_in_phieu_kham = current_prescription['user_id']
-    # session['ma_phieu_kham_today'] = current_prescription['id']
-    # session['user_id_in_phieu_kham'] = current_prescription['user_id']
 
     if not user_id_in_phieu_kham:
         err_msg = "Không tìm được mã bệnh nhân trong danh sách các phiếu khám"
@@ -470,7 +490,7 @@ def add_prescription_process():
             medicine_id=thuoc_id, prescription_id=ma_phieu_kham_today, new_quantity=new_quantity
         )
     else:
-        dao.save_chi_tiet_phieu_kham(
+        dao.save_prescription_detail(
             so_luong_thuoc=quantity, thuoc_id=thuoc_id, phieu_kham_id=ma_phieu_kham_today
         )
 
@@ -481,16 +501,11 @@ def add_prescription_process():
 
 @app.context_processor
 def load_thuoc_trong_chi_tiet_pk():
-    thuoc_trong_ctpk = dao.load_thuoc_in_chi_tiet_phieu_kham_today(
+    thuoc_trong_ctpk = dao.get_medicine_in_prescription_detail(
         user_id_in_phieu_kham)
     return {
         'medicines_in_prescription': thuoc_trong_ctpk
     }
-    # thuoc_trong_ctpk = dao.load_thuoc_in_chi_tiet_phieu_kham_today(
-    #     session['user_id_in_phieu_kham'])
-    # return {
-    #     'medicines_in_prescription': thuoc_trong_ctpk
-    # }
 
 @app.context_processor
 def is_user_have_appointment_today():
@@ -506,18 +521,6 @@ def is_user_have_appointment_today():
     return {
             'is_user_have_appointment': False
         }
-    # if session['user_id_in_phieu_kham'] == None:
-    #     return {
-    #         'is_user_have_appointment': False
-    #     }
-    # is_user_have_appointment = dao.get_prescriptions_for_today(session['user_id_in_phieu_kham'])
-    # if is_user_have_appointment:
-    #     return {
-    #         'is_user_have_appointment': True
-    #     }
-    # return {
-    #         'is_user_have_appointment': False
-    #     }
 
 
 @app.route("/doctor_save_prescription", methods=['GET', 'POST'])
@@ -526,34 +529,30 @@ def doctor_save_prescription_process():
     suc_msg = ''
     action = request.form.get('action')
     user_id = user_id_in_phieu_kham
-    # user_id = session['user_id_in_phieu_kham']
     user_info = dao.get_user(user_id=user_id)
-    user_prescriptions = dao.get_prescriptions_for_today(user_id=user_id)
     symptoms = request.form.get('trieu_chung')
     diagnosis = request.form.get('chuan_doan')
     if action.startswith('delete'):
         try:
             medicine_id = int(action.split('-')[1])
             prescription_id = ma_phieu_kham_today
-            # prescription_id = session['ma_phieu_kham_today']
             dao.delete_medicine_from_prescription(medicine_id, prescription_id)
             suc_msg = f"Deleted medicine with ID {medicine_id} successfully."
         except Exception as e:
             err_msg = f"Failed to delete medicine: {str(e)}"
     elif action.startswith('save'):
         phieu_kham_id = ma_phieu_kham_today
-        # phieu_kham_id = session['ma_phieu_kham_today']
-        check_pk_id = dao.load_phieu_kham_id_today_by_phieu_kham_id(phieu_kham_id=phieu_kham_id)
+        check_pk_id = dao.get_prescription_tody_by_id(phieu_kham_id=phieu_kham_id)
 
         if check_pk_id:
             try:
                 check_pk_id_numString = str(check_pk_id[0][0])
                 if symptoms and diagnosis:
-                    dao.update_phieu_kham(phieu_kham_id=check_pk_id_numString, trieu_chung=symptoms,
+                    dao.update_prescription(phieu_kham_id=check_pk_id_numString, trieu_chung=symptoms,
                                           chuan_doan=diagnosis)
 
-                    benh_id = dao.load_benh_id_by_ten_benh(diagnosis)
-                    lsb_id = dao.load_lich_su_benh_id_by_phieu_kham_id(check_pk_id_numString)
+                    benh_id = dao.get_disease(diagnosis)
+                    lsb_id = dao.get_medical_history_by_prescription_id(check_pk_id_numString)
 
                     if lsb_id and benh_id:
                         dao.add_medical_history_detail(medical_history_id=lsb_id[0][0], disease_id=benh_id[0][0])
@@ -617,7 +616,7 @@ def cashier():
         if today_prescriptions:
             phieu_kham_id = today_prescriptions[0]['id']
             # phieu_kham = dao.get_prescription_details(today_prescriptions[0]['id'])
-            hoa_don = dao.load_hoa_don_by_phieu_kham_id(phieu_kham_id=phieu_kham_id)
+            hoa_don = dao.get_invoice_by_id(phieu_kham_id=phieu_kham_id)
             if hoa_don:
                 err_msg = "Hóa đơn đã được thanh toán!"
                 return render_template("cashier.html", err_msg=err_msg, tien_kham=tien_kham, user_bill=user_bill)
@@ -648,9 +647,9 @@ def medical_history_process():
         else:
             medical_history_records = []
     else:
-        all_users = dao.load_users()
+        all_users = dao.get_user()
         for user in all_users:
-            user_prescription_data = dao.load_prescription_data(user_id=user.id)
+            user_prescription_data = dao.load_prescription_data(user_id=user['user_id'])
             if user_prescription_data:
                 data = {'user': user, 'prescription': user_prescription_data}
                 for i in data['prescription']:
@@ -736,7 +735,7 @@ def load_user_role():
 
 @app.context_processor
 def load_diseases():
-    diseases = dao.load_diseases()
+    diseases = dao.get_disease()
     return {
         'diseases': diseases
     }

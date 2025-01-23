@@ -19,11 +19,5 @@ def introduce():
 def support():
     return render_template("support.html")
 
-
-@app.route("/nurse")
-def nurse_process():
-    current_date = datetime.now().strftime('%Y-%m-%d')
-    return render_template("nurse.html", current_date=current_date)
-
 if __name__ == '__main__':
     app.run(debug=True)
